@@ -45,7 +45,6 @@ plot.igraph(completegraph)
 
 #Question 5:
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-library(pander)
 graphDetails<-function(edgeFile)
 {
   graph<-as.matrix(read.table(edgeFile))
@@ -73,11 +72,10 @@ iii). The global clustering coefficient is the ratio of the number of the traing
 iv).The average shortest path length of the graphs is shown in table 1.
 
 v). Degree centrality and Betweenness centrality have been used to find central nodes.
-Degree centrality measures the number of edges a given vertex.
-Betweeness centrality gives a higher score to a node if it connects to many high score nodes.
-There is a very high overlap between the central nodes as measured by both the centrality measures. 
+Degree centrality is defined as the number of edges incident upon a link.
+Betweeness centrality is another centrality measure in a graph. It quantifies the number of times a node acts as a bridge along the shortest path between two other nodes.
 
-These nodes are selected as central nodes, because they are in the shortest path between several nodes and have easier access to all other nodes. They also form edges with other high scoring vertices.
+The overlap between the central nodes measured by these centrality measures is very high. The results of the overlap between the central nodes for the three graphs is shown in table 1. In graph A, B, and C, there are 2, 4, and 4 common central nodes out of top 5 nodes. These nodes are found to be central because the connections of the those nodes is very large due to which they appears frequently in the shortest path between several nodes. These nodes are also called as hub nodes due to their easier access and strong interaction with other nodes.
 
 #Question 6:
 To check for small-world property of the networks, we can do the following:
@@ -86,13 +84,13 @@ i). Compute degree distribution of the network.
 
 ii). Try to fit a power law distribution to the degree distribution.
 
-iii). Compare clustering coefficients of the network with that of a random network with
-same number of nodes and edges.
+iii). Compare clustering coefficients of the network with that of a random network with same number of nodes and edges.
 
 iv). Compare average path lengths of the network with that of a random network with 
 same number of nodes and edges.
 
 v). For a small world network:
+
 
 
 #Question 7:
