@@ -30,12 +30,6 @@ ggplot(data=data, aes(x=degrees,y=cc)) +
 
 ```
 
-#Question 2:
-
-![](https://upload.wikimedia.org/wikipedia/commons/8/82/US-ASCII_code_chart.png)
-
-#Question 3:
-
 #Question 4:
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 library("igraph")
@@ -108,3 +102,7 @@ iv). Try to fit a power law distribution to the degree distribution and if p<0.0
 v). Take a subset of the network and check if it retains the properties of the full network.
 
 vi). Expand the network (with more real data or accurately simulated data) and check if it retains the properties of the full network.
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question3.jpg)
