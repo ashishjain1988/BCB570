@@ -16,17 +16,23 @@ knitr::opts_chunk$set(
 #Question 1:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-
+library("ggplot2")
 degreeDistribution<-c(2,4,4,4,4,5,4,3,2)
-ccDistribution<-c(1,4/6)
-hist(degreeDistribution)
-hist(ccDistribution)
+degreeProb<-c(0,2/9,1/9,5/9,1/9)
+degrees<-c(1:5)
+ccDistribution<-c(1,0.5,0.5,0.5,0.5,2/5,0.5,2/3,1)
+data<-data.frame(degree=degrees,degreeProbabilty=degreeProb,cc=c(0,1,2/3,0.5,2/5))
+ggplot(data=data, aes(x=degrees,y=degreeProbabilty))+
+  geom_point() + labs(y="P(k)", x="Degree (k)")
+
+ggplot(data=data, aes(x=degrees,y=cc)) +
+    geom_point() + labs(y="C(k)", x="Degree(k)")
 
 ```
 
 #Question 2:
 
-![Caption for the picture.](https://upload.wikimedia.org/wikipedia/commons/8/82/US-ASCII_code_chart.png)
+![](https://upload.wikimedia.org/wikipedia/commons/8/82/US-ASCII_code_chart.png)
 
 #Question 3:
 
@@ -39,15 +45,16 @@ plot.igraph(completegraph)
 
 #Question 5:
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+library(pander)
 graphDetails<-function(edgeFile)
 {
   graph<-as.matrix(read.table(edgeFile))
   graphGraph<-graph.data.frame(graph,directed = FALSE)
-  graphDetails<-c(length(V(graphGraph)), length(E(graphGraph)), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph))
+  graphDetails<-c(length(V(graphGraph)), length(E(graphGraph)), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph), toString(head(order(igraph::degree(graphGraph),decreasing = TRUE),5)), toString(head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5)), toString(intersect(head(order(igraph::degree(graphGraph),decreasing = TRUE),5), head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5))))
   return(graphDetails)
 }
 
-details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path")
+details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path","Top 5 Central Nodes(Hightest Degree)","Top 5 Central Nodes (Betweeness)","Common Nodes")
 path<-"https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/"
 graphADetails<-graphDetails(paste0(path,"graphA.txt"))
 graphBDetails<-graphDetails(paste0(path,"graphB.txt"))
@@ -65,10 +72,12 @@ iii). The global clustering coefficient is the ratio of the number of the traing
 
 iv).The average shortest path length of the graphs is shown in table 1.
 
-v). Closeness centrality and Betweenness centrality have been used to find central nodes.
-Closeness centrality measures the number of steps required to access every other vertex from a given vertex.
-Eigenvector centrality gives a higher score to a node if it connects to many high score nodes.
-There is a very high overlap between the central nodes as measured by both the centrality measures. These nodes are selected as central nodes, because they are in the shortest path between several nodes and have easier access to all other nodes. They also form edges with other high scoring vertices.
+v). Degree centrality and Betweenness centrality have been used to find central nodes.
+Degree centrality measures the number of edges a given vertex.
+Betweeness centrality gives a higher score to a node if it connects to many high score nodes.
+There is a very high overlap between the central nodes as measured by both the centrality measures. 
+
+These nodes are selected as central nodes, because they are in the shortest path between several nodes and have easier access to all other nodes. They also form edges with other high scoring vertices.
 
 #Question 6:
 To check for small-world property of the networks, we can do the following:
