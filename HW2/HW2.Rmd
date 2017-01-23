@@ -83,8 +83,6 @@ iii). Compare clustering coefficients of the network with that of a random netwo
 iv). Compare average path lengths of the network with that of a random network with 
 same number of nodes and edges.
 
-v). For a small world network:
-
 
 
 #Question 7:
