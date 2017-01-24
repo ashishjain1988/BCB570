@@ -17,16 +17,19 @@ knitr::opts_chunk$set(
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 library("ggplot2")
+nodesNames<-c("u","w","v","y","x","z","r","t","s")
 degreeDistribution<-c(2,4,4,4,4,5,4,3,2)
 degreeProb<-c(0,2/9,1/9,5/9,1/9)
 degrees<-c(1:5)
 ccDistribution<-c(1,0.5,0.5,0.5,0.5,2/5,0.5,2/3,1)
-data<-data.frame(degree=degrees,degreeProbabilty=degreeProb,cc=c(0,1,2/3,0.5,2/5))
+data<-data.frame(degree=degrees,degreeProbabilty=degreeProb,cc=(c(0,1,2/3,0.5,2/5)),ccProb=c(0,2/9,1/9,5/9,1/9))
+table<-data.frame(Node_Names=nodesNames,Degree=degreeDistribution,CC=ccDistribution)
+knitr::kable(table,caption = "Graph Details")
 ggplot(data=data, aes(x=degrees,y=degreeProbabilty))+
-  geom_point() + labs(y="P(k)", x="Degree (k)")
+  geom_point() + labs(y="P(k)", x="Degree (k)",title="Degree Distribution") + theme(plot.title = element_text(hjust = 0.5))
 
-ggplot(data=data, aes(x=degrees,y=cc)) +
-    geom_point() + labs(y="C(k)", x="Degree(k)")
+ggplot(data=data, aes(x=cc,y=ccProb)) +
+    geom_point() + labs(y="C(k)", x="k", title="Clustering Coefficient Distribution") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -59,11 +62,11 @@ knitr::kable(table,caption = "Graph Details")
 
 i). As from the table, the number of nodes for graph A and C is close to the number of edges. Apart from that, the graph density which is the ratio of the edges and number of possible edges is very low. From these two parameters we can say that Graph A and C are sparse. In the case of graph B, the number of edges is not close to either the number of nodes or $nodes^{2}$. So, from that we can say that this graph is somewhere in-between.
 
-ii). The diameter and the radius of the graphs is shown in table 1.
+ii). The diameter and the radius of the graphs is shown in table 2.
 
 iii). The global clustering coefficient is the ratio of the number of the traingles or closed triplets and the number of connected triples of vertices in the graph. On the other hand, the average clustering coefficient is the average of the local clustering coefficient of all the vertices in the graph. The local clustering coefficient is the ratio of the triangles connected to the vertex and the triples centered on the vertex. From their definations, the difference between them is that global clustering coefficient puts more weight on the high degree nodes, while the local clustering coefficient places more weight on the low degree nodes.
 
-iv).The average shortest path length of the graphs is shown in table 1.
+iv).The average shortest path length of the graphs is shown in table 2.
 
 v). Degree centrality and Betweenness centrality have been used to find central nodes.
 Degree centrality is defined as the number of edges incident upon a link.
@@ -72,18 +75,15 @@ Betweeness centrality is another centrality measure in a graph. It quantifies th
 The overlap between the central nodes measured by these centrality measures is very high. The results of the overlap between the central nodes for the three graphs is shown in table 1. In graph A, B, and C, there are 2, 4, and 4 common central nodes out of top 5 nodes. These nodes are found to be central because the connections of the those nodes is very large due to which they appears frequently in the shortest path between several nodes. These nodes are also called as hub nodes due to their easier access and strong interaction with other nodes.
 
 #Question 6:
-To check for small-world property of the networks, we can do the following:
+In order to check the small-world property of the networks, we can do the following:
 
-i). Compute degree distribution of the network.
+i). First we should compute the degree distribution of the graph. It is known that the small-world networks have over abundance of hub nodes and thus the degree distribution follows the power law distribution.
 
-ii). Try to fit a power law distribution to the degree distribution.
+ii). The next step is to compare the clustering coefficient of the network with a random network of same vertices and edges. The clustering coefficient of small-world networks is high.
 
-iii). Compare clustering coefficients of the network with that of a random network with same number of nodes and edges.
+iii). We can also compare the average path lengths of the given graph with that of a random network. The average path length of a small-world network is comparatively less than that of a random network of small vertices and edges.
 
-iv). Compare average path lengths of the network with that of a random network with 
-same number of nodes and edges.
-
-
+iv).  We can also check the distribution of the average shortest path of the network. For small world networks, the average shortest path is directly proportional to log N, where N is the number of nodes in the network.
 
 #Question 7:
 To check for scale-free property of the networks, we can do the following:
