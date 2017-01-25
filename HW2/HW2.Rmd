@@ -1,5 +1,5 @@
 ---
-title: "BCB570 Assignment 1"
+title: "BCB570 Assignment 2"
 author: "Ashish Jain"
 output: pdf_document
 ---
@@ -11,12 +11,14 @@ knitr::opts_chunk$set(
     warning = FALSE
 )
 #install.packages("igraph")
+#install.packages("tidyverse")
 ```
 
 #Question 1:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 library("ggplot2")
+library("tidyverse")
 nodesNames<-c("u","w","v","y","x","z","r","t","s")
 degreeDistribution<-c(2,4,4,4,4,5,4,3,2)
 degreeProb<-c(0,2/9,1/9,5/9,1/9)
@@ -24,12 +26,12 @@ degrees<-c(1:5)
 ccDistribution<-c(1,0.5,0.5,0.5,0.5,2/5,0.5,2/3,1)
 data<-data.frame(degree=degrees,degreeProbabilty=degreeProb,cc=(c(0,1,2/3,0.5,2/5)),ccProb=c(0,2/9,1/9,5/9,1/9))
 table<-data.frame(Node_Names=nodesNames,Degree=degreeDistribution,CC=ccDistribution)
-knitr::kable(table,caption = "Graph Details")
-ggplot(data=data, aes(x=degrees,y=degreeProbabilty))+
-  geom_point() + labs(y="P(k)", x="Degree (k)",title="Degree Distribution") + theme(plot.title = element_text(hjust = 0.5))
+table %>% knitr::kable(caption = "Graph Details")
+data %>% ggplot(aes(x=degrees,y=degreeProbabilty))+
+  geom_point() + labs(y="P(k)", x="Degree (k)",title="Degree Distribution") + theme(plot.title = element_text(hjust = 0.5)) + geom_smooth(method = "lm", se= FALSE)
 
-ggplot(data=data, aes(x=cc,y=ccProb)) +
-    geom_point() + labs(y="C(k)", x="k", title="Clustering Coefficient Distribution") + theme(plot.title = element_text(hjust = 0.5))
+data %>% ggplot(aes(x=cc,y=ccProb)) +
+    geom_point() + labs(y="C(k)", x="k", title="Clustering Coefficient Distribution") + theme(plot.title = element_text(hjust = 0.5)) + geom_smooth(method = "lm", se= FALSE)
 
 ```
 
@@ -57,7 +59,7 @@ graphBDetails<-graphDetails(paste0(path,"graphB.txt"))
 graphCDetails<-graphDetails(paste0(path,"graphC.txt"))
 
 table<-data.frame(Headings=details,Graph_A=graphADetails,Graph_B=graphBDetails,Graph_C=graphCDetails)
-knitr::kable(table,caption = "Graph Details")
+table %>% knitr::kable(caption = "Graph Details")
 ```
 
 i). As from the table, the number of nodes for graph A and C is close to the number of edges. Apart from that, the graph density which is the ratio of the edges and number of possible edges is very low. From these two parameters we can say that Graph A and C are sparse. In the case of graph B, the number of edges is not close to either the number of nodes or $nodes^{2}$. So, from that we can say that this graph is somewhere in-between.
@@ -101,6 +103,6 @@ v). Take a subset of the network and check if it retains the properties of the f
 
 vi). Expand the network (with more real data or accurately simulated data) and check if it retains the properties of the full network.
 
-![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
+![Depth First Search](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
 
-![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question3.jpg)
+![Breath First Search](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question3.jpg)
