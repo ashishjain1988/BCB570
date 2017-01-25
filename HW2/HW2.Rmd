@@ -88,20 +88,19 @@ iii). We can also compare the average path lengths of the given graph with that 
 iv).  We can also check the distribution of the average shortest path of the network. For small world networks, the average shortest path is directly proportional to log N, where N is the number of nodes in the network.
 
 #Question 7:
-To check for scale-free property of the networks, we can do the following:
+In order to check that whether a given network is scale-free or not:
 
-i). Plot degree distribution vs # of nodes (log-log scale) to check for a linear decreasing 
-relation.
+i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution where $\gamma$ is between 2 and 3.
+$$P(k) \sim k^{-\gamma}$$
 
-ii). Plot clustering coefficient vs # of nodes (log-log scale) to check for a constant line.
+ii). Check the number of hubs (high degree nodes). Scale-free networks have a small number of hubs.
 
-iii). Check if there are few hubs.
+iii). After that, plot clustering coefficient (C(k)) vs degree (k) on a log-log scale. For scale-free networks the clustering coefficient decreases as the node degree increases.
 
-iv). Try to fit a power law distribution to the degree distribution and if p<0.05, the network is not  cale free.
+iv). Take out a small part of the network and check its properties including degree distribution and Clustering coefficient distribution. If it is a scale-free network the subnetwork will have statistically similar to the overall network.
 
-v). Take a subset of the network and check if it retains the properties of the full network.
+v). Carry out the expansion of the network (with simulated data) and check if it has properties similar to the original network.
 
-vi). Expand the network (with more real data or accurately simulated data) and check if it retains the properties of the full network.
 
 ![Depth First Search](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
 
