@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 #Question 1:
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-library("ggplot2")
 library("tidyverse")
 nodesNames<-c("u","w","v","y","x","z","r","t","s")
 degreeDistribution<-c(2,4,4,4,4,5,4,3,2)
@@ -30,8 +29,10 @@ table %>% knitr::kable(caption = "Graph Details")
 data %>% ggplot(aes(x=degrees,y=degreeProbabilty))+
   geom_point() + labs(y="P(k)", x="Degree (k)",title="Degree Distribution") + theme(plot.title = element_text(hjust = 0.5)) + geom_smooth(method = "lm", se= FALSE)
 
-data %>% ggplot(aes(x=cc,y=ccProb)) +
-    geom_point() + labs(y="C(k)", x="k", title="Clustering Coefficient Distribution") + theme(plot.title = element_text(hjust = 0.5)) + geom_smooth(method = "lm", se= FALSE)
+#boxplot(ccDistribution~degreeDistribution,xlab='Degree(k)',ylab='Clustering Coefficient (C(k))',main="Clustering Coefficient Distribution")
+
+table %>% ggplot(aes(x=Degree,y=CC)) +
+    geom_boxplot(aes(group=Degree)) + xlim(c(1,6)) + labs(y="C(k)", x="Degree(k)", title="Clustering Coefficient Distribution") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -49,16 +50,16 @@ graphDetails<-function(edgeFile)
   graph<-as.matrix(read.table(edgeFile))
   graphGraph<-graph.data.frame(graph,directed = FALSE)
   graphDetails<-c(length(V(graphGraph)), length(E(graphGraph)), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph), toString(head(order(igraph::degree(graphGraph),decreasing = TRUE),5)), toString(head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5)), toString(intersect(head(order(igraph::degree(graphGraph),decreasing = TRUE),5), head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5))))
-  return(graphDetails)
+  return(list(graphDetails,graphGraph))
 }
 
 details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path","Top 5 Central Nodes(Hightest Degree)","Top 5 Central Nodes (Betweeness)","Common Nodes")
 path<-"https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/"
-graphADetails<-graphDetails(paste0(path,"graphA.txt"))
-graphBDetails<-graphDetails(paste0(path,"graphB.txt"))
-graphCDetails<-graphDetails(paste0(path,"graphC.txt"))
+outputA<-graphDetails(paste0(path,"graphA.txt"))
+outputB<-graphDetails(paste0(path,"graphB.txt"))
+outputC<-graphDetails(paste0(path,"graphC.txt"))
 
-table<-data.frame(Headings=details,Graph_A=graphADetails,Graph_B=graphBDetails,Graph_C=graphCDetails)
+table<-data.frame(Headings=details,Graph_A=outputA[[1]],Graph_B=outputB[[1]],Graph_C=outputC[[1]])
 table %>% knitr::kable(caption = "Graph Details")
 ```
 
@@ -73,8 +74,19 @@ iv).The average shortest path length of the graphs is shown in table 2.
 v). Degree centrality and Betweenness centrality have been used to find central nodes.
 Degree centrality is defined as the number of edges incident upon a link.
 Betweeness centrality is another centrality measure in a graph. It quantifies the number of times a node acts as a bridge along the shortest path between two other nodes.
+```{r}
+graphA<-outputA[[2]]
+graphB<-outputB[[2]]
+graphC<-outputC[[2]]
+plot(graphA, vertex.size=igraph::betweenness(graphA)/100)
+plot(graphA, vertex.size=igraph::degree(graphA))
+plot(graphB, vertex.size=igraph::betweenness(graphB)/100)
+plot(graphB, vertex.size=igraph::degree(graphB))
+plot(graphC, vertex.size=igraph::betweenness(graphC)/100)
+plot(graphC, vertex.size=igraph::degree(graphC))
+```
 
-The overlap between the central nodes measured by these centrality measures is very high. The results of the overlap between the central nodes for the three graphs is shown in table 1. In graph A, B, and C, there are 2, 4, and 4 common central nodes out of top 5 nodes. These nodes are found to be central because the connections of the those nodes is very large due to which they appears frequently in the shortest path between several nodes. These nodes are also called as hub nodes due to their easier access and strong interaction with other nodes.
+The overlap between the central nodes measured by these centrality measures is very high. The results of the overlap between the central nodes for the three graphs is shown in table 2. In graph A, B, and C, there are 2, 4, and 4 common central nodes out of top 5 nodes. These nodes are found to be central because the connections of the those nodes is very large due to which they appears frequently in the shortest path between several nodes. These nodes are also called as hub nodes due to their easier access and strong interaction with other nodes.
 
 #Question 6:
 In order to check the small-world property of the networks, we can do the following:
