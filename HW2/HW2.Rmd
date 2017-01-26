@@ -83,14 +83,20 @@ i). First we should compute the degree distribution of the graph. It is known th
 
 ii). The next step is to compare the clustering coefficient of the network with a random network of same vertices and edges. The clustering coefficient of small-world networks is high.
 
+$$(Clustering \ Coefficient)_{Network} \ \gg  (Clustering \ Coefficient)_{Random Network}$$
+
 iii). We can also compare the average path lengths of the given graph with that of a random network. The average path length of a small-world network is comparatively less than that of a random network of small vertices and edges.
 
-iv).  We can also check the distribution of the average shortest path of the network. For small world networks, the average shortest path is directly proportional to log N, where N is the number of nodes in the network.
+$$(Average \ Path \ Length)_{Network} \ \geq  (Average \ Path \ Length)_{Random Network}$$
+
+iv).  We can also check the distribution of the average shortest path of the network. For small world networks,
+$$Average \ shortest \ path \ \sim \ log(N)$$
+where N is the number of nodes in the network.
 
 #Question 7:
 In order to check that whether a given network is scale-free or not:
 
-i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution where $\gamma$ is between 2 and 3.
+i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). After that, try to fit the power law distribution to the degree distribution by using function <function> in R and if p<0.05, the network is not scale free. For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution where $\gamma$ is between 2 and 3.
 $$P(k) \sim k^{-\gamma}$$
 
 ii). Check the number of hubs (high degree nodes). Scale-free networks have a small number of hubs.
