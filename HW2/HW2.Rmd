@@ -49,7 +49,7 @@ graphDetails<-function(edgeFile)
 {
   graph<-as.matrix(read.table(edgeFile))
   graphGraph<-graph.data.frame(graph,directed = FALSE)
-  graphDetails<-c(length(V(graphGraph)), length(E(graphGraph)), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph), toString(head(order(igraph::degree(graphGraph),decreasing = TRUE),5)), toString(head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5)), toString(intersect(head(order(igraph::degree(graphGraph),decreasing = TRUE),5), head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5))))
+  graphDetails<-c(vcount(graphGraph), ecount(graphGraph), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph), toString(head(order(igraph::degree(graphGraph),decreasing = TRUE),5)), toString(head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5)), toString(intersect(head(order(igraph::degree(graphGraph),decreasing = TRUE),5), head(order(igraph::betweenness(graphGraph),decreasing = TRUE),5))))
   return(list(graphDetails,graphGraph))
 }
 
@@ -74,16 +74,16 @@ iv).The average shortest path length of the graphs is shown in table 2.
 v). Degree centrality and Betweenness centrality have been used to find central nodes.
 Degree centrality is defined as the number of edges incident upon a link.
 Betweeness centrality is another centrality measure in a graph. It quantifies the number of times a node acts as a bridge along the shortest path between two other nodes.
-```{r}
-graphA<-outputA[[2]]
-graphB<-outputB[[2]]
-graphC<-outputC[[2]]
-plot(graphA, vertex.size=igraph::betweenness(graphA)/100)
-plot(graphA, vertex.size=igraph::degree(graphA))
-plot(graphB, vertex.size=igraph::betweenness(graphB)/100)
-plot(graphB, vertex.size=igraph::degree(graphB))
-plot(graphC, vertex.size=igraph::betweenness(graphC)/100)
-plot(graphC, vertex.size=igraph::degree(graphC))
+```{r , tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+#graphA<-outputA[[2]]
+#graphB<-outputB[[2]]
+#graphC<-outputC[[2]]
+#plot(graphA, vertex.size=igraph::betweenness(graphA)/100)
+#plot(graphA, vertex.size=igraph::degree(graphA))
+#plot(graphB, vertex.size=igraph::betweenness(graphB)/100)
+#plot(graphB, vertex.size=igraph::degree(graphB))
+#plot(graphC, vertex.size=igraph::betweenness(graphC)/100)
+#plot(graphC, vertex.size=igraph::degree(graphC))
 ```
 
 The overlap between the central nodes measured by these centrality measures is very high. The results of the overlap between the central nodes for the three graphs is shown in table 2. In graph A, B, and C, there are 2, 4, and 4 common central nodes out of top 5 nodes. These nodes are found to be central because the connections of the those nodes is very large due to which they appears frequently in the shortest path between several nodes. These nodes are also called as hub nodes due to their easier access and strong interaction with other nodes.
@@ -105,11 +105,40 @@ iv).  We can also check the distribution of the average shortest path of the net
 $$Average \ shortest \ path \ \sim \ log(N)$$
 where N is the number of nodes in the network.
 
+```{r , tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+graphA<-outputA[[2]]
+graphB<-outputB[[2]]
+graphC<-outputC[[2]]
+
+getRandomNetworkDetails<-function(graph)
+{
+  randomNetwork <- erdos.renyi.game(vcount(graph), ecount(graph),type='gnm')
+  output1<-average.path.length(randomNetwork)
+  output2<-average.path.length(graph)
+  output3<-transitivity(randomNetwork, type="global")
+  output4<-transitivity(graph, type="global")
+  return(c(output1,output2,output3,output4))
+}
+
+graphAProp<-getRandomNetworkDetails(graphA)
+graphBProp<-getRandomNetworkDetails(graphB)
+graphCProp<-getRandomNetworkDetails(graphC)
+
+details<-c("Clustering Coefficient-Graph","Clustering Coefficient-Random Graph","Average Path Length-Graph","Average Path Length-Random Graph")
+
+table<-data.frame(Features=details,Graph_A=graphAProp,Graph_B=graphBProp,Graph_C=graphCProp)
+table %>% knitr::kable(caption = "Small-World Property Test")
+```
+
+From the table 3, it can seen that only Graph C have both the clustering coefficient and average path length greater than a random network which means it is a small-world network.
+
 #Question 7:
 In order to check that whether a given network is scale-free or not:
 
-i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). After that, try to fit the power law distribution to the degree distribution by using function <function> in R and if p<0.05, the network is not scale free. For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution where $\gamma$ is between 2 and 3.
-$$P(k) \sim k^{-\gamma}$$
+i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). After that, try to fit the power law distribution to the degree distribution. For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution.
+$$P(k) \sim k^{-\alpha}$$
+
+In R there we can do this by using function *power.law.fit* in igraph and if the p-value of this test is less than 0.05, the network is not scale free (Rejection of null hypothesis that this data have been drawn from the fitted power-law distribution).
 
 ii). Check the number of hubs (high degree nodes). Scale-free networks have a small number of hubs.
 
@@ -117,8 +146,22 @@ iii). After that, plot clustering coefficient (C(k)) vs degree (k) on a log-log 
 
 iv). Take out a small part of the network and check its properties including degree distribution and Clustering coefficient distribution. If it is a scale-free network the subnetwork will have statistically similar to the overall network.
 
-v). Carry out the expansion of the network (with simulated data) and check if it has properties similar to the original network.
+```{r , tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+graphA<-outputA[[2]]
+graphB<-outputB[[2]]
+graphC<-outputC[[2]]
 
+fit1 <- power.law.fit(degree(graphA),9,implementation="plfit") 
+fit2 <- power.law.fit(degree(graphB),9,implementation="plfit") 
+fit3 <- power.law.fit(degree(graphC),9,implementation="plfit") 
+
+details<-c("Graph A","Graph B","Graph C")
+
+table<-data.frame(Graph=details,Alpha=c(fit1$alpha,fit2$alpha,fit3$alpha),X_min=c(fit1$xmin,fit2$xmin,fit3$xmin),P_Value=c(fit1$KS.p,fit2$KS.p,fit3$KS.p))
+table %>% knitr::kable(caption = "Power Law Fit Details")
+```
+
+From table 4, it can seen that Graph A and Graph C has P-Values greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. Although, the hubs in the graphs are not relevant as the $\alpha$ is greater than 3 in both the cases.
 
 ![Depth First Search](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
 
