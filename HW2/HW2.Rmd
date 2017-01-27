@@ -91,7 +91,7 @@ The overlap between the central nodes measured by these centrality measures is v
 #Question 6:
 In order to check the small-world property of the networks, we can do the following:
 
-i). First we should compute the degree distribution of the graph. It is known that the small-world networks have over abundance of hub nodes and thus the degree distribution follows the power law distribution.
+i). First we should compute the degree distribution of the graph. It is known that the small-world networks have over abundance of hub nodes.
 
 ii). The next step is to compare the clustering coefficient of the network with a random network of same vertices and edges. The clustering coefficient of small-world networks is high.
 
@@ -113,10 +113,10 @@ graphC<-outputC[[2]]
 getRandomNetworkDetails<-function(graph)
 {
   randomNetwork <- erdos.renyi.game(vcount(graph), ecount(graph),type='gnm')
-  output1<-average.path.length(randomNetwork)
-  output2<-average.path.length(graph)
-  output3<-transitivity(randomNetwork, type="global")
-  output4<-transitivity(graph, type="global")
+  output1<-average.path.length(graph)
+  output2<-average.path.length(randomNetwork)
+  output3<-transitivity(graph, type="global")
+  output4<-transitivity(randomNetwork, type="global")
   return(c(output1,output2,output3,output4))
 }
 
@@ -124,13 +124,13 @@ graphAProp<-getRandomNetworkDetails(graphA)
 graphBProp<-getRandomNetworkDetails(graphB)
 graphCProp<-getRandomNetworkDetails(graphC)
 
-details<-c("Clustering Coefficient-Graph","Clustering Coefficient-Random Graph","Average Path Length-Graph","Average Path Length-Random Graph")
+details<-c("Average Path Length-Graph","Average Path Length-Random Graph","Clustering Coefficient-Graph","Clustering Coefficient-Random Graph")
 
 table<-data.frame(Features=details,Graph_A=graphAProp,Graph_B=graphBProp,Graph_C=graphCProp)
 table %>% knitr::kable(caption = "Small-World Property Test")
 ```
 
-From the table 3, it can seen that only Graph C have both the clustering coefficient and average path length greater than a random network which means it is a small-world network.
+From the table 3, it can be seen that none of the graphs satisfies the small-world network properties. None of them have both their clustering coefficient and average path length greater than the random network.
 
 #Question 7:
 In order to check that whether a given network is scale-free or not:
@@ -138,7 +138,7 @@ In order to check that whether a given network is scale-free or not:
 i). First plot the degree distribution on a log-log scale (Probability of degree (P(k)) V/S degree (k)). After that, try to fit the power law distribution to the degree distribution. For scale-free networks, this plot will follow the power-law distribution which is a linear decreasing distribution.
 $$P(k) \sim k^{-\alpha}$$
 
-In R there we can do this by using function *power.law.fit* in igraph and if the p-value of this test is less than 0.05, the network is not scale free (Rejection of null hypothesis that this data have been drawn from the fitted power-law distribution).
+In R, we can do this by using function *power.law.fit* in igraph and if the p-value of this test is less than 0.05, the network is not scale free (Rejection of null hypothesis that this data have been drawn from the fitted power-law distribution).
 
 ii). Check the number of hubs (high degree nodes). Scale-free networks have a small number of hubs.
 
@@ -151,6 +151,10 @@ graphA<-outputA[[2]]
 graphB<-outputB[[2]]
 graphC<-outputC[[2]]
 
+plot(degree.distribution(graphA), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph A")
+plot(degree.distribution(graphB), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph B")
+plot(degree.distribution(graphC), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph C")
+
 fit1 <- power.law.fit(degree(graphA),9,implementation="plfit") 
 fit2 <- power.law.fit(degree(graphB),9,implementation="plfit") 
 fit3 <- power.law.fit(degree(graphC),9,implementation="plfit") 
@@ -161,7 +165,7 @@ table<-data.frame(Graph=details,Alpha=c(fit1$alpha,fit2$alpha,fit3$alpha),X_min=
 table %>% knitr::kable(caption = "Power Law Fit Details")
 ```
 
-From table 4, it can seen that Graph A and Graph C has P-Values greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. Although, the hubs in the graphs are not relevant as the $\alpha$ is greater than 3 in both the cases.
+From table 4, it can be seen that Graph A and Graph C has P-Values greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. Although, the hubs in the graphs are not relevant as the $\alpha$ is greater than 3 in both the cases.
 
 ![Depth First Search](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW2/Question2.jpg)
 
