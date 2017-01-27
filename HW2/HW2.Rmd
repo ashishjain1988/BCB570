@@ -151,9 +151,9 @@ graphA<-outputA[[2]]
 graphB<-outputB[[2]]
 graphC<-outputC[[2]]
 
-plot(degree.distribution(graphA), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph A")
-plot(degree.distribution(graphB), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph B")
-plot(degree.distribution(graphC), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph C")
+#plot(degree.distribution(graphA), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph A")
+#plot(degree.distribution(graphB), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph B")
+#plot(degree.distribution(graphC), log="xy",type='o',xlab = "log(k)",ylab = "log(P(k))",main = "Degree Distribution of Graph C")
 
 fit1 <- power.law.fit(degree(graphA),9,implementation="plfit") 
 fit2 <- power.law.fit(degree(graphB),9,implementation="plfit") 
