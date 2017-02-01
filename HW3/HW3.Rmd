@@ -1,0 +1,20 @@
+---
+title: "BCB570 Assignment 3"
+author: "Ashish Jain"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+#Question 1:
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+library("tidyverse")
+
+```
