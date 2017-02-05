@@ -16,5 +16,191 @@ knitr::opts_chunk$set(
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 library("tidyverse")
+library("igraph")
+
+graphDetails<-function(edgeFile)
+{
+  graph<-as.matrix(read.table((edgeFile)))
+  graphGraph1<-graph.data.frame(graph,directed = FALSE)
+  graphGraph<-simplify(graphGraph1,remove.multiple = TRUE, remove.loops = TRUE,
+  edge.attr.comb = igraph_opt("edge.attr.comb"))
+  graphDetails<-c(vcount(graphGraph), ecount(graphGraph), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph))
+  return(list(graphDetails,graphGraph))
+}
+path<-"https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/"
+outputY2H_uniondata<-graphDetails(paste0(path,"Y2H_uniondata.txt"))
+outputCCSB_YI1data<-graphDetails(paste0(path,"CCSB_YI1.txt"))
+essentialGenes<-read.table(paste0(path,"essentialGenes.txt"))
+
+details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path")
+
+table<-data.frame(Headings=details,"Y2H-Union"=outputY2H_uniondata[[1]],"CCSB-YI1"=outputCCSB_YI1data[[1]])
+table %>% knitr::kable(caption = "PPI Details")
+
+graphUnion<-outputY2H_uniondata[[2]]
+graphCCSB<-outputCCSB_YI1data[[2]]
+
+gdetails<-function(graphGraph1)
+{
+  graphGraph<-simplify(graphGraph1,remove.multiple = TRUE, remove.loops = TRUE,
+  edge.attr.comb = igraph_opt("edge.attr.comb"))
+  graphDetails<-c(vcount(graphGraph), ecount(graphGraph), graph.density(graphGraph),diameter(graphGraph), radius(graphGraph), transitivity(graphGraph, type = "average"),transitivity(graphGraph, type = "global"),mean_distance(graphGraph))
+  return(graphDetails)
+}
+
+dgraphUnion <- decompose.graph(graphUnion) # returns a list of three graphs
+dgraphCCSB <- decompose.graph(graphCCSB)
+
+lgraphUnion<-dgraphUnion[[1]]
+for(i in 1:length(dgraphUnion))
+{
+  if(vcount(lgraphUnion) < vcount(dgraphUnion[[i]]))
+  {
+    lgraphUnion <- dgraphUnion[[i]]
+  }
+}
+
+lgraphCCSB<-dgraphCCSB[[1]]
+
+for(i in 1:length(dgraphCCSB))
+{
+  if(vcount(lgraphCCSB) < vcount(dgraphCCSB[[i]]))
+  {
+    lgraphCCSB <- dgraphCCSB[[i]]
+  }
+}
+
+table<-data.frame(Headings=details,"Y2H-Union"=gdetails(lgraphUnion),"CCSB-YI1"=gdetails(lgraphCCSB))
+table %>% knitr::kable(caption = "PPI Details of largest sub-network")
 
 ```
+
+
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+##Small world property
+
+getRandomNetworkDetails<-function(graph)
+{
+  randomNetwork <- erdos.renyi.game(vcount(graph), ecount(graph),type='gnm')
+  output1<-average.path.length(graph)
+  output2<-average.path.length(randomNetwork)
+  output3<-transitivity(graph, type="global")
+  output4<-transitivity(randomNetwork, type="global")
+  return(c(output1,output2,output3,output4))
+}
+
+graphUnionProp<-getRandomNetworkDetails(graphUnion)
+graphCCSBProp<-getRandomNetworkDetails(graphCCSB)
+
+details<-c("Average Path Length-Graph","Average Path Length-Random Graph","Clustering Coefficient-Graph","Clustering Coefficient-Random Graph")
+
+table<-data.frame(Features=details,"Y2H-Union"=graphUnionProp,"CCSB-YI1"=graphCCSBProp)
+table %>% knitr::kable(caption = "Small-World Property Test")
+```
+
+From the table 3, it can be seen that none of the networks satisfies the small-world network properties. None of them have both their clustering coefficient and average path length greater than the random network.
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+table<-data.frame(Features=details,"Y2H-Union"=getRandomNetworkDetails(lgraphUnion),"CCSB-YI1"=getRandomNetworkDetails(lgraphCCSB))
+table %>% knitr::kable(caption = "Small-World Property Test for largest sub-network")
+```
+
+From the table 4, it can be seen that none of the largest sub-network satisfies the small-world network properties. None of them have both their clustering coefficient and average path length greater than the random network.
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+##Power law fit
+fitUnion <- power.law.fit(degree(graphUnion),9,implementation="plfit") 
+fitCCSB <- power.law.fit(degree(graphCCSB),9,implementation="plfit") 
+
+details<-c("Graph Union","Graph CCSB")
+
+table<-data.frame(Graph=details,Alpha=c(fitUnion$alpha,fitCCSB$alpha),"X-min"=c(fitUnion$xmin,fitCCSB$xmin),"P-Value"=c(fitUnion$KS.p,fitCCSB$KS.p))
+table %>% knitr::kable(caption = "Power Law Fit Details")
+
+```
+
+From table 5, it can be seen that Y2H-Union and CCSB-YI network has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases.
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+##Power law fit
+fitUnion <- power.law.fit(degree(lgraphUnion),9,implementation="plfit") 
+fitCCSB <- power.law.fit(degree(lgraphCCSB),9,implementation="plfit") 
+
+table<-data.frame(Graph=details,Alpha=c(fitUnion$alpha,fitCCSB$alpha),"X-min"=c(fitUnion$xmin,fitCCSB$xmin),"P-Value"=c(fitUnion$KS.p,fitCCSB$KS.p))
+table %>% knitr::kable(caption = "Power Law Fit Details of largest sub-network")
+```
+
+Also from table 6, it can be seen that the largest subnetwork of Y2H-Union and CCSB-YI networks has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases.
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=50)}
+data<-data.frame(prob=degree.distribution(graphUnion), degree=c(1:length(degree.distribution(graphUnion))))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of Y2H Union PPI") +theme(plot.title = element_text(hjust = 0.5))
+
+data<-data.frame(prob=degree.distribution(graphCCSB), degree=c(1:length(degree.distribution(graphCCSB))))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB PPI") +theme(plot.title = element_text(hjust = 0.5))
+
+data<-data.frame(prob=degree.distribution(lgraphUnion), degree=c(1:length(degree.distribution(lgraphUnion))))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of Y2H Union PPI largest sub-network") +theme(plot.title = element_text(hjust = 0.5))
+
+data<-data.frame(prob=degree.distribution(lgraphCCSB), degree=c(1:length(degree.distribution(lgraphCCSB))))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB PPI of largest sub-network") +theme(plot.title = element_text(hjust = 0.5))
+```
+
+From the degree distribution of the plot we defines hubs which have degree greater than 10.
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+hubNodesUnion<-names(which(igraph::degree(graphUnion) >= 10, arr.ind = T))
+hubNodesCCSB<-names(which(igraph::degree(graphCCSB) >= 10, arr.ind = T))
+
+rhubNodesUnion<-sample(V(graphUnion),length(hubNodesUnion))
+rhubNodesCCSB<-sample(V(graphCCSB),length(hubNodesCCSB))
+
+hubNodeslUnion<-names(which(igraph::degree(lgraphUnion) >= 10, arr.ind = T))
+hubNodeslCCSB<-names(which(igraph::degree(lgraphCCSB) >= 10, arr.ind = T))
+
+rhubNodeslUnion<-sample(V(lgraphUnion),length(hubNodeslUnion))
+rhubNodeslCCSB<-sample(V(lgraphCCSB),length(hubNodeslCCSB))
+
+
+#intersect(hubNodesUnion,as.vector(essentialGenes[,1]))
+#Compare with the random nodes.
+```
+
+
+#Question 2:
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+top5percentUnion<-vcount(lgraphUnion)*0.05
+centralGenesUnion<-names(sort(igraph::betweenness(lgraphUnion),decreasing = TRUE)[1:as.integer(top5percentUnion)])
+
+top5percentCCSB<-vcount(lgraphCCSB)*0.05
+centralGenesCCSB<-names(sort(igraph::betweenness(lgraphCCSB),decreasing = TRUE)[1:as.integer(top5percentCCSB)])
+
+#intersect(hubNodesUnion,as.vector(essentialGenes[,1]))
+
+```
+
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+gUniond10 <- delete.edges(lgraphUnion, E(lgraphUnion)[sample(seq_along(E(lgraphUnion)), 0.1*ecount(lgraphUnion))])
+
+gUniond25 <- delete.edges(lgraphUnion, E(lgraphUnion)[sample(seq_along(E(lgraphUnion)), 0.25*ecount(lgraphUnion))])
+
+gCCSBd10 <- delete.edges(lgraphCCSB, E(lgraphCCSB)[sample(seq_along(E(lgraphCCSB)), 0.1*ecount(lgraphCCSB))])
+
+gCCSBd25 <- delete.edges(lgraphCCSB, E(lgraphCCSB)[sample(seq_along(E(lgraphCCSB)), 0.25*ecount(lgraphCCSB))])
+
+write_graph(gUniond10,"UnionD10.txt","ncol")
+write_graph(gUniond25,"UnionD25.txt","ncol")
+
+write_graph(gCCSBd10,"CCSBD10.txt","ncol")
+write_graph(gCCSBd25,"CCSBD25.txt","ncol")
+
+
+```
+
+
