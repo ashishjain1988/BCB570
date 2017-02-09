@@ -191,7 +191,6 @@ length(hubNodeslCCSB)
 #intersect(rhubNodeslCCSB,as.vector(essentialGenes[,1]))
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodeslUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodeslCCSB,as.vector(essentialGenes[,1])))))
 table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest connected sub-network")
-
 ```
 
 As seen from the above results, only four essential genes overlapped with the hub genes based on the degree distrubution. These genes includes YDR388W (8), YGL115W (8), YLR423C (80), and YPL031C (12). Out of these YLR423C, and YPL031C genes found in both the PPI networks as well as in the essential genes. The biological functions of these genes are as following.
@@ -228,7 +227,6 @@ centralGenesCCSB
 details<-c("Graph Union","Graph CCSB")
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(centralGenesUnion,as.vector(essentialGenes[,1]))),toString(intersect(centralGenesCCSB,as.vector(essentialGenes[,1])))))
 table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest sub-network")
-
 ```
 
 As seen from the above results, only three essential genes overlapped with the hub genes based on the betweeness. These genes includes YKL002W (7), YLR423C (80), and YPL031C (12). Both the genes YLR423C, and YPL031C pops up as the hub genes based on two centralities we have used. 
@@ -304,3 +302,16 @@ table %>% knitr::kable(caption = "Details of the Largest Modules")
 ##iii).
 For this question we selected the largest modules of both the PPI networks based on the number of nodes in the network. After that, we used the [Yeast Genome](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster.
 
+YJR010CA YPR159CA YBR126WA not found for CCSB
+
+![Y1-Union PPI Module 1 - Cytoscape](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/Union-Clust-Cytoscape.png)
+
+![CCSB PPI Module 1 - Cytoscape](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/CCSB-clust-Cytoscape.png)
+
+![Y1-Union PPI Module 1 - Yeast genome Results](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/Union-Clust-GOEnrichment.png)
+
+![Y1-Union PPI Module 1 - Revigo Treemap](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/Union-Clust-Revigo.png)
+
+![CCSB PPI Module 1 - Yeast genome Results](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/CCSB-Clust-GOEnrichment.png)
+
+![CCSB PPI Module 1 - Revigo Treemap](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/CCSB-Clust-Revigo.png)
