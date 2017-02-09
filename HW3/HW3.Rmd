@@ -20,11 +20,12 @@ knitr::opts_chunk$set(
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 library("tidyverse")
 library("igraph")
+library("curl")
 library("pander")
 
 graphDetails<-function(edgeFile,sep)
 {
-  graph<-as.matrix(read.table((edgeFile),sep = sep))
+  graph<-as.matrix(read.table((curl(edgeFile)),sep = sep))
   graphGraph1<-graph.data.frame(graph,directed = FALSE)
   graphGraph<-simplify(graphGraph1,remove.multiple = TRUE, remove.loops = TRUE,
   edge.attr.comb = igraph_opt("edge.attr.comb"))
@@ -38,7 +39,7 @@ essentialGenes<-read.table(paste0(path,"essentialGenes.txt"))
 
 details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path")
 
-table<-data.frame(Headings=details,"Y2H-Union"=outputY2H_uniondata[[1]],"CCSB-YI1"=outputCCSB_YI1data[[1]])
+table<-data.frame(Properties=details,"Y2H-Union"=outputY2H_uniondata[[1]],"CCSB-YI1"=outputCCSB_YI1data[[1]])
 table %>% knitr::kable(caption = "PPI Details of the Network")
 
 graphUnion<-outputY2H_uniondata[[2]]
@@ -69,8 +70,8 @@ largestSubNet<-function(graph)
 lgraphUnion<-largestSubNet(graphUnion)
 lgraphCCSB<-largestSubNet(graphCCSB)
 
-table<-data.frame(Headings=details,"Y2H-Union"=gdetails(lgraphUnion),"CCSB-YI1"=gdetails(lgraphCCSB))
-table %>% knitr::kable(caption = "PPI Details of largest sub-network")
+table<-data.frame(Properties=details,"Y2H-Union"=gdetails(lgraphUnion),"CCSB-YI1"=gdetails(lgraphCCSB))
+table %>% knitr::kable(caption = "PPI Details of largest connected sub-network")
 
 ```
 
@@ -94,8 +95,8 @@ getRandomNetworkDetails<-function(graph)
 
 #randomGraphAverageLength<-rep(transitivity(erdos.renyi.game(vcount(graphUnion), ecount(graphUnion ),type='gnm'),type="global"),100)
 
-graphUnionProp<-getRandomNetworkDetails(graphUnion)
-graphCCSBProp<-getRandomNetworkDetails(graphCCSB)
+graphUnionProp<-graphUnion %>% getRandomNetworkDetails()
+graphCCSBProp<-graphCCSB %>% getRandomNetworkDetails()
 
 details<-c("Average Path Length-Graph","Average Path Length-Random Graph","Clustering Coefficient-Graph","Clustering Coefficient-Random Graph")
 
@@ -103,14 +104,19 @@ table<-data.frame(Features=details,"Y2H-Union"=graphUnionProp,"CCSB-YI1"=graphCC
 table %>% knitr::kable(caption = "Small-World Property Test of the Network")
 ```
 
-From the table 3, it can be seen that none of the networks satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with same number of nodes but the average path length is less than that of the random network.
+Small world network satisfies the following conditions:
+
+$$(Clustering \ Coefficient)_{Network} \ \gg  (Clustering \ Coefficient)_{Random Network}$$
+$$(Average \ Path \ Length)_{Network} \ \geq  (Average \ Path \ Length)_{Random Network}$$
+
+From table 3, it can be seen that none of the networks satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with same number of nodes but the average path length is less than that of the random network.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 table<-data.frame(Features=details,"Y2H-Union"=getRandomNetworkDetails(lgraphUnion),"CCSB-YI1"=getRandomNetworkDetails(lgraphCCSB))
-table %>% knitr::kable(caption = "Small-World Property Test for largest sub-network")
+table %>% knitr::kable(caption = "Small-World Property Test for largest connected sub-network")
 ```
 
-From the table 4, it can be seen that none of the largest sub-network satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with same number of nodes but the average path length is less than that of the random network.
+From table 4, it can be seen that none of the largest sub-network satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with same number of nodes but the average path length is less than that of the random network.
 
 ##Scale Free Network Test
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
@@ -119,14 +125,14 @@ From the table 4, it can be seen that none of the largest sub-network satisfies 
 fitUnion <- power.law.fit(degree(graphUnion),9,implementation="plfit") 
 fitCCSB <- power.law.fit(degree(graphCCSB),9,implementation="plfit") 
 
-details<-c("Graph Union","Graph CCSB")
+details<-c("Y2H-Union","CCSB-YI1")
 
 table<-data.frame(Graph=details,Alpha=c(fitUnion$alpha,fitCCSB$alpha),"X-min"=c(fitUnion$xmin,fitCCSB$xmin),"P-Value"=c(fitUnion$KS.p,fitCCSB$KS.p))
 table %>% knitr::kable(caption = "Power Law Fit Details of the Network")
 
 ```
 
-From table 5, it can be seen that Y2H-Union and CCSB-YI network has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases.
+From table 5, it can be seen that Y2H-Union and CCSB-YI network has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases. From this we can conclude that this network is scale free.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 ##Power law fit
@@ -134,10 +140,10 @@ fitUnion <- power.law.fit(degree(lgraphUnion),9,implementation="plfit")
 fitCCSB <- power.law.fit(degree(lgraphCCSB),9,implementation="plfit") 
 
 table<-data.frame(Graph=details,Alpha=c(fitUnion$alpha,fitCCSB$alpha),"X-min"=c(fitUnion$xmin,fitCCSB$xmin),"P-Value"=c(fitUnion$KS.p,fitCCSB$KS.p))
-table %>% knitr::kable(caption = "Power Law Fit Details of largest sub-network")
+table %>% knitr::kable(caption = "Power Law Fit Details of largest connected sub-network")
 ```
 
-Also from table 6, it can be seen that the largest subnetwork of Y2H-Union and CCSB-YI networks has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases.
+Also from table 6, it can be seen that the largest subnetwork of Y2H-Union and CCSB-YI1 networks has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases. From this we can conclude that this network is scale free.
 
 ##ii). Finding the hubs based on degree centrality
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=50)}
@@ -145,16 +151,16 @@ data<-data.frame(prob=degree.distribution(graphUnion), degree=c(1:length(degree.
 data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of Y2H Union PPI") +theme(plot.title = element_text(hjust = 0.5))
 
 data<-data.frame(prob=degree.distribution(graphCCSB), degree=c(1:length(degree.distribution(graphCCSB))))
-data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB PPI") +theme(plot.title = element_text(hjust = 0.5))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB YI1 PPI") +theme(plot.title = element_text(hjust = 0.5))
 
 data<-data.frame(prob=degree.distribution(lgraphUnion), degree=c(1:length(degree.distribution(lgraphUnion))))
-data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of Y2H Union PPI largest sub-network") +theme(plot.title = element_text(hjust = 0.5))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of Y2H Union PPI largest connected sub-network") +theme(plot.title = element_text(hjust = 0.5))
 
 data<-data.frame(prob=degree.distribution(lgraphCCSB), degree=c(1:length(degree.distribution(lgraphCCSB))))
-data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB PPI of largest sub-network") +theme(plot.title = element_text(hjust = 0.5))
+data %>% ggplot(aes(x=degree,y=prob)) + geom_point() + geom_line() + labs(x="Degree",y="Probability (Degree)", title="Degree Distribution of CCSB YI1 PPI of largest connected sub-network") +theme(plot.title = element_text(hjust = 0.5))
 ```
 
-From the degree distribution of the plot we define hubs which have degree greater than or equal to 8.
+From the degree distribution plot we define hubs to be those genes which have degree greater than or equal to 8.
 
 ##Intersection of the essential genes and hubs in whole network
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
@@ -167,12 +173,12 @@ length(hubNodesCCSB)
 
 #intersect(rhubNodesUnion,as.vector(essentialGenes[,1]))
 #intersect(rhubNodesCCSB,as.vector(essentialGenes[,1]))
-details<-c("Graph Union","Graph CCSB")
+details<-c("Y2H-Union","CCSB-YI1")
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodesUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodesCCSB,as.vector(essentialGenes[,1])))))
-table %>% knitr::kable(caption = "Essential genes overlap with hub genes of Network")
+table %>% knitr::kable(caption = "Essential genes overlap with hub genes of the PPI Network")
 ```
 
-##Intersection of the essential genes and hubs in largest sub-network
+##Intersection of the essential genes and hubs in the largest connected sub-network
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 hubNodeslUnion<-names(which(igraph::degree(lgraphUnion) >= 8, arr.ind = T))
 hubNodeslCCSB<-names(which(igraph::degree(lgraphCCSB) >= 8, arr.ind = T))
@@ -183,30 +189,30 @@ length(hubNodeslCCSB)
 
 #intersect(rhubNodeslUnion,as.vector(essentialGenes[,1]))
 #intersect(rhubNodeslCCSB,as.vector(essentialGenes[,1]))
-details<-c("Graph Union","Graph CCSB")
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodeslUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodeslCCSB,as.vector(essentialGenes[,1])))))
-table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest sub-network")
+table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest connected sub-network")
 
 ```
 
-As seen from the above results, only four essential genes overlapped with the hub genes based on the degree distrubution. These genes includes YDR388W (8), YGL115W (8), YLR423C (80), and YPL031C (12). Out of these YLR423C, and YPL031C genes found in both the PPI networks as well as in the essential genes. The biological functions of these genes are shown in table below.
+As seen from the above results, only four essential genes overlapped with the hub genes based on the degree distrubution. These genes includes YDR388W (8), YGL115W (8), YLR423C (80), and YPL031C (12). Out of these YLR423C, and YPL031C genes found in both the PPI networks as well as in the essential genes. The biological functions of these genes are as following.
 
-```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-details<-c("YDR388W", "YGL115W", "YLR423C","YPL031C")
-table<-data.frame(Gene=details,"Function"=c("Calmodulin-binding actin-associated protein; roles in endocytic membrane tabulation and constriction, and exocytosis; viability following starvation or osmotic stress","activates glucose-repressed genes, represses glucose-induced genes; role in sporulation, and peroxisome biogenesis;","phagophore assembly site organization; regulatory subunit of an autophagy-specific complex that includes Atg1p and Atg13p; stimulates Atg1p kinase activity;","has ten cyclin partners; involved in regulating the cellular response to nutrient levels and environmental conditions and progression through the cell cycle."))
-table %>% pandoc.table(style = "rmarkdown",caption = "Essential genes overlap with hub genes of largest connected sub-network")
-#table %>% knitr::kable()
-```
-
+* **YDR388W**: The gene translates to a calmodulin-binding actin-associated protein. It play a significant role in endocytic membrane tabulation and constriction, and exocytosis. It also contributes to cell viability following starvation or osmotic stress.
+ 
+* **YGL115W**: This gene activates glucose-repressed genes, represses glucose-induced genes and play an important role in sporulation, and peroxisome biogenesis.
+ 
+* **YLR423C**: It is involved in the phagophore assembly site organization. It also acts as a regulatory subunit of an autophagy-specific complex that includes Atg1p and Atg13p. In addition to that, it also stimulates Atg1p kinase activity.
+ 
+* **YPL031C**: It is involved in the regulation of the cellular response to nutrient levels and environmental conditions and progression through the cell cycle.
 
 ##iii).
-
+The results which we are getting are not at all smilar to that of the results from Yu paper. In the Yu paper, there is a 20% overlapping of the central genes with that of the essential genes. In our case, we only found a total of 4 genes out of the 108 hub genes.
 
 #Question 2:
 
 ##i).
 
 ##Central genes based on the betweenness centrality
+In this, we first calculated the betweenness of the all the nodes in both the Y2H Union and CCSN YI1 PPI network. After that, the top 5% genes sorted on the basis of betweenness are taken as the hub genes. 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 
 top5percentUnion<-vcount(lgraphUnion)*0.05
@@ -225,7 +231,15 @@ table %>% knitr::kable(caption = "Essential genes overlap with hub genes of larg
 
 ```
 
-As seen from the above results, only three essential genes overlapped with the hub genes based on the betweeness. These genes includes YKL002W (7), YLR423C (80), and YPL031C (12). Both the genes YLR423C, and YPL031C pops up as the hub genes based on two centralities we have used.
+As seen from the above results, only three essential genes overlapped with the hub genes based on the betweeness. These genes includes YKL002W (7), YLR423C (80), and YPL031C (12). Both the genes YLR423C, and YPL031C pops up as the hub genes based on two centralities we have used. 
+
+* **YKL002W**: It is a class E Vps protein of the ESCRT-III complex. It is required for sorting of integral membrane proteins into lumenal vesicles of multivesicular bodies, and for delivery of newly synthesized vacuolar enzymes to the vacuole, involved in endocytosis.
+ 
+* **YLR423C**: It is involved in the phagophore assembly site organization. It also acts as a regulatory subunit of an autophagy-specific complex that includes Atg1p and Atg13p. In addition to that, it also stimulates Atg1p kinase activity.
+ 
+* **YPL031C**: It is involved in the regulation of the cellular response to nutrient levels and environmental conditions and progression through the cell cycle.
+
+So, out of 465 essential genes we only get 3 genes as the hub nodes in the Y2H union PPI network and 1 gene in the CCSB YI1 PPI network. From these results, we can say that there is no correlation between the central genes based on betweenness and essential genes.
 
 
 ##ii).
@@ -239,12 +253,12 @@ gCCSBd25 <- delete.edges(lgraphCCSB, E(lgraphCCSB)[sample(seq_along(E(lgraphCCSB
 #write_graph(gCCSBd10,"CCSBD10.txt","ncol")
 #write_graph(gCCSBd25,"CCSBD25.txt","ncol")
 
-details<-c("Graph Union D10%","Graph Union D25%","Graph CCSB D10%","Graph CCSB D25%")
+details<-c("Y2H-Union D10%","Y2H-Union D25%","Y2H-CCSB D10%","Y2H-CCSB D25%")
 table<-data.frame(Graph=details,"Whole-Net-Degree"=c(1573,1413,925,832),"Whole-Net-Edges"=c(2267, 1889, 1339,1116),"Sub-Net-Degree"=c(1520,1303,881,779),"Sub-Net-Edges"=c(2230, 1822, 1303,1086))
 table %>% knitr::kable(caption = "Details of the Deleted Networks")
 ```
 
-We have deleted 10% and 25% edges from the largest connected sub-network of both the PPI networks. After that, we extracted the largest connected sub-network from that PPI network and performed the MCL clustering in cytoscape. We have used the [**Cluster Maker2**](http://apps.cytoscape.org/apps/clustermaker2) plugin for carrying out the MCL clustering in cytoscape.
+We have deleted 10% and 25% edges from the largest connected sub-network of both the PPI networks. After that, we extracted the largest connected sub-network from that PPI network and performed the MCL clustering in cytoscape. We have used the [**Cluster Maker2**](http://apps.cytoscape.org/apps/clustermaker2) plugin for carrying out the MCL clustering. In table 10, the number of nodes and edges for both complete and largest connected subnetwork is shown for the deleted networks.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 #path<-"/Users/jain/BCB570/HW3/"
@@ -264,8 +278,12 @@ lgraphCCSBD10Clust<-largestSubNet(outputgraphCCSBD10Clust[[2]])
 lgraphCCSBD25Clust<-largestSubNet(outputgraphCCSBD25Clust[[2]])
 
 details<-c("Number of Nodes","Number of Edges","Graph Density","Diameter","Radius","Average Clustering Coefficent","Global Clustering Coefficent","Average Shortest Path")
-table<-data.frame(Headings=details,"Y2H-Union"=gdetails(lgraphUnionClust),"Y2H-UnionD10"=gdetails(lgraphUnionD10Clust),"Y2H-UnionD25"=gdetails(lgraphUnionD25Clust),"CCSB-YI1"=gdetails(lgraphCCSBClust),"CCSB-YI1D10"=gdetails(lgraphCCSBD10Clust),"CCSB-YI1D25"=gdetails(lgraphCCSBD25Clust))
-table %>% knitr::kable(caption = "Details of the Largest Modules")
+table<-data.frame(Properties=details,"Y2H-Union"=gdetails(lgraphUnionClust),"Y2H-UnionD10"=gdetails(lgraphUnionD10Clust),"Y2H-UnionD25"=gdetails(lgraphUnionD25Clust))
+table %>% knitr::kable(caption = "Details of the Largest Modules in Y2H Union PPI")
+
+table<-data.frame(Properties=details,"CCSB-YI1"=gdetails(lgraphCCSBClust),"CCSB-YI1D10"=gdetails(lgraphCCSBD10Clust),"CCSB-YI1D25"=gdetails(lgraphCCSBD25Clust))
+table %>% knitr::kable(caption = "Details of the Largest Modules in CCSB-YI1 PPI")
+
 ```
 
 ##Comparison of Modules
@@ -278,21 +296,11 @@ intersect(names(V(lgraphCCSBClust)),names(V(lgraphCCSBD10Clust)))
 intersect(names(V(lgraphCCSBClust)),names(V(lgraphCCSBD25Clust)))
 
 details<-c("Union-M1v/sCCSB-M1","Union-M1v/sUnionD10-M1", "Union-M1v/sUnionD25-M1", "CCSB-M1v/sCCSBD10-M1", "CCSB-M1v/sCCSBD25-M1")
-table<-data.frame(Comparisons=details,"Number of Gene Overlap"=c(length(intersect(names(V(lgraphUnionClust)), names(V(lgraphCCSBClust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD10Clust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD25Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD10Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD25Clust))))),"Number of Gene in Network 1"= c(vcount(lgraphUnionClust),vcount(lgraphUnionClust),vcount(lgraphUnionClust),vcount(lgraphCCSBClust),vcount(lgraphCCSBClust)), "Number of Gene in Network 2" = c(vcount(lgraphCCSBClust), vcount(lgraphUnionD10Clust), vcount(lgraphUnionD25Clust), vcount(lgraphCCSBD10Clust), vcount(lgraphCCSBD25Clust)))
+table<-data.frame(Comparisons=details,"Number of Gene Overlap"= c(length(intersect (names(V(lgraphUnionClust)), names(V(lgraphCCSBClust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD10Clust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD25Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD10Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD25Clust))))), "Number of Gene in Network 1"= c(vcount(lgraphUnionClust), vcount(lgraphUnionClust),vcount(lgraphUnionClust), vcount(lgraphCCSBClust),vcount(lgraphCCSBClust)), "Number of Gene in Network 2" = c(vcount(lgraphCCSBClust), vcount(lgraphUnionD10Clust), vcount(lgraphUnionD25Clust), vcount(lgraphCCSBD10Clust), vcount(lgraphCCSBD25Clust)))
 table %>% knitr::kable(caption = "Details of the Largest Modules")
 ```
 
 
-
 ##iii).
 For this question we selected the largest modules of both the PPI networks based on the number of nodes in the network. After that, we used the [Yeast Genome](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster.
-
-From the figure it can s
-
-![Y1-Union PPI Module 1 - Cytoscape]()
-![CCSB PPI Module 1 - Cytoscape]()
-![Y1-Union PPI Module 1 - Yeast genome Results]()
-![Y1-Union PPI Module 1 - Revigo Treemap]()
-![CCSB PPI Module 1 - Yeast genome Results]()
-![CCSB PPI Module 1 - Revigo Treemap]()
 
