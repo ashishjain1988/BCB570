@@ -72,15 +72,11 @@ lgraphCCSB<-largestSubNet(graphCCSB)
 
 table<-data.frame(Properties=details,"Y2H-Union"=gdetails(lgraphUnion),"CCSB-YI1"=gdetails(lgraphCCSB))
 table %>% knitr::kable(caption = "PPI Details of largest connected sub-network")
-
 ```
 
 
 ##Small World Network Test
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-
-##Small world property
-
 getRandomNetworkDetails<-function(graph)
 {
   randomNetwork <- erdos.renyi.game(vcount(graph), ecount(graph),type='gnm')
@@ -91,10 +87,6 @@ getRandomNetworkDetails<-function(graph)
   return(c(output1,output2,output3,output4))
 }
 
-#randomGraphAverageLength<-rep(average.path.length(erdos.renyi.game(vcount(graphUnion), ecount(graphUnion),type='gnm')),100)
-
-#randomGraphAverageLength<-rep(transitivity(erdos.renyi.game(vcount(graphUnion), ecount(graphUnion ),type='gnm'),type="global"),100)
-
 graphUnionProp<-graphUnion %>% getRandomNetworkDetails()
 graphCCSBProp<-graphCCSB %>% getRandomNetworkDetails()
 
@@ -104,12 +96,12 @@ table<-data.frame(Features=details,"Y2H-Union"=graphUnionProp,"CCSB-YI1"=graphCC
 table %>% knitr::kable(caption = "Small-World Property Test of the Network")
 ```
 
-Small world network satisfies the following conditions:
+In order to test the small worldness of a network, we can use the concept described in Watts and Strogatz’s paper. The idea is to compare the average path length and clustering coefficients with that of a random network with the same number of nodes and vertices. According to them, small world network satisfies the following conditions:
 
 $$(Clustering \ Coefficient)_{Network} \ \gg  (Clustering \ Coefficient)_{Random Network}$$
 $$(Average \ Path \ Length)_{Network} \ \geq  (Average \ Path \ Length)_{Random Network}$$
 
-From table 3, it can be seen that none of the networks satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with same number of nodes but the average path length is less than that of the random network.
+From table 3, it can be seen that none of the networks satisfies the small-world network properties. Although, both the networks have very large clustering coefficient compared to the random network with the same number of nodes but the average path length is less than that of the random network.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 table<-data.frame(Features=details,"Y2H-Union"=getRandomNetworkDetails(lgraphUnion),"CCSB-YI1"=getRandomNetworkDetails(lgraphCCSB))
@@ -120,7 +112,6 @@ From table 4, it can be seen that none of the largest sub-network satisfies the 
 
 ##Scale Free Network Test
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-
 ##Power law fit
 fitUnion <- power.law.fit(degree(graphUnion),9,implementation="plfit") 
 fitCCSB <- power.law.fit(degree(graphCCSB),9,implementation="plfit") 
@@ -129,7 +120,6 @@ details<-c("Y2H-Union","CCSB-YI1")
 
 table<-data.frame(Graph=details,Alpha=c(fitUnion$alpha,fitCCSB$alpha),"X-min"=c(fitUnion$xmin,fitCCSB$xmin),"P-Value"=c(fitUnion$KS.p,fitCCSB$KS.p))
 table %>% knitr::kable(caption = "Power Law Fit Details of the Network")
-
 ```
 
 From table 5, it can be seen that Y2H-Union and CCSB-YI network has P-Value greater than 0.05 which means that we are not able to reject the null hypothesis that the original data could have been drawn from the fitted power-law distribution. The hubs in the graphs are also significant as the $\alpha$ is between 2 and 3 in both the cases. From this we can conclude that this network is scale free.
@@ -168,11 +158,6 @@ hubNodesUnion<-names(which(igraph::degree(graphUnion) >= 8, arr.ind = T))
 hubNodesCCSB<-names(which(igraph::degree(graphCCSB) >= 8, arr.ind = T))
 length(hubNodesUnion)
 length(hubNodesCCSB)
-#rhubNodesUnion<-sample(V(graphUnion),length(hubNodesUnion))
-#rhubNodesCCSB<-sample(V(graphCCSB),length(hubNodesCCSB))
-
-#intersect(rhubNodesUnion,as.vector(essentialGenes[,1]))
-#intersect(rhubNodesCCSB,as.vector(essentialGenes[,1]))
 details<-c("Y2H-Union","CCSB-YI1")
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodesUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodesCCSB,as.vector(essentialGenes[,1])))))
 table %>% knitr::kable(caption = "Essential genes overlap with hub genes of the PPI Network")
@@ -185,10 +170,7 @@ hubNodeslCCSB<-names(which(igraph::degree(lgraphCCSB) >= 8, arr.ind = T))
 length(hubNodeslUnion)
 length(hubNodeslCCSB)
 #rhubNodeslUnion<-rep(intersect(sample(V(lgraphUnion),length(hubNodeslUnion)),as.vector(essentialGenes[,1])),100)
-#rhubNodeslCCSB<-sample(V(lgraphCCSB),length(hubNodeslCCSB))
 
-#intersect(rhubNodeslUnion,as.vector(essentialGenes[,1]))
-#intersect(rhubNodeslCCSB,as.vector(essentialGenes[,1]))
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodeslUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodeslCCSB,as.vector(essentialGenes[,1])))))
 table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest connected sub-network")
 ```
@@ -259,8 +241,6 @@ table %>% knitr::kable(caption = "Details of the Deleted Networks")
 We have deleted 10% and 25% edges from the largest connected sub-network of both the PPI networks. After that, we extracted the largest connected sub-network from that PPI network and performed the MCL clustering in cytoscape. We have used the [**Cluster Maker2**](http://apps.cytoscape.org/apps/clustermaker2) plugin for carrying out the MCL clustering. In table 10, the number of nodes and edges for both complete and largest connected subnetwork is shown for the deleted networks.
 
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
-#path<-"/Users/jain/BCB570/HW3/"
-#graphUnionClust<-read_graph(paste0(path,"Union_lsub-cluster.graphml"),format="graphml")
 outputgraphUnionClust<-graphDetails(paste0(path,"Union-lsub-clustered.csv"),",")
 outputgraphUnionD10Clust<-graphDetails(paste0(path,"Union-D10-Clust.csv"),",")
 outputgraphUnionD25Clust<-graphDetails(paste0(path,"Union-D25-Clust.csv"),",")
@@ -281,7 +261,6 @@ table %>% knitr::kable(caption = "Details of the Largest Modules in Y2H Union PP
 
 table<-data.frame(Properties=details,"CCSB-YI1"=gdetails(lgraphCCSBClust),"CCSB-YI1D10"=gdetails(lgraphCCSBD10Clust),"CCSB-YI1D25"=gdetails(lgraphCCSBD25Clust))
 table %>% knitr::kable(caption = "Details of the Largest Modules in CCSB-YI1 PPI")
-
 ```
 
 ##Comparison of Modules
@@ -339,8 +318,6 @@ For this question, we selected the largest modules of both the PPI networks base
 Figure 3 consists of one part of the output that we get after entering the genes from the largest connected cluster of Y1-Union PPI. The genes in the cluster are associated with various biosynthetic and metabolic processes which are essential for the survival of yeast. In Figure 4, it is seen that we have four major groups of GO Biological processes including single organism metabolism, organophosphate biosynthesis, single organism process, and pyrimidine containing compound metabolism. All of these groups are in fact essential for yeast growth and development thus we can say from this observation that this is a very important cluster of genes for yeast development.
 
 Figure 5 consists of one part of the output that we get after entering the genes from the largest connected cluster of CCSB YI1 PPI. The genes in the cluster are associated with various glycoprotein and lipid metabolism and biosynthetic processes. These processes are essential for the growth and development of yeast. We also used Revigo to group the GO terms. In Figure 6, it is seen that we have two major groups of GO Biological processes including lipid and glycoprotein metabolism. These biological processes are observed to be important for the growth and development of yeast.
-
-YJR010CA YPR159CA YBR126WA not found for CCSB
 
 ![Y1-Union PPI Module 1 - Cytoscape](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW3/Union-Clust-Cytoscape.png)
 
