@@ -21,7 +21,6 @@ knitr::opts_chunk$set(
 library("tidyverse")
 library("igraph")
 library("curl")
-library("pander")
 
 graphDetails<-function(edgeFile,sep)
 {
@@ -96,7 +95,7 @@ table<-data.frame(Features=details,"Y2H-Union"=graphUnionProp,"CCSB-YI1"=graphCC
 table %>% knitr::kable(caption = "Small-World Property Test of the Network")
 ```
 
-In order to test the small worldness of a network, we can use the concept described in Watts and Strogatz’s paper. The idea is to compare the average path length and clustering coefficients with that of a random network with the same number of nodes and vertices. According to them, small world network satisfies the following conditions:
+In order to test the small worldness of a network, we can use the concept described in **Watts and Strogatz’s** paper. The idea is to compare the average path length and clustering coefficients with that of a random network with the same number of nodes and vertices. According to them, small world network satisfies the following conditions:
 
 $$(Clustering \ Coefficient)_{Network} \ \gg  (Clustering \ Coefficient)_{Random Network}$$
 $$(Average \ Path \ Length)_{Network} \ \geq  (Average \ Path \ Length)_{Random Network}$$
@@ -186,7 +185,10 @@ As seen from the above results, only four essential genes overlapped with the hu
 * **YPL031C**: It is involved in the regulation of the cellular response to nutrient levels and environmental conditions and progression through the cell cycle.
 
 ##iii).
-The results which we are getting are not at all smilar to that of the results from Yu paper. In the Yu paper, there is a 20% overlapping of the central genes with that of the essential genes. In our case, we only found a total of 4 genes out of the 108 hub genes.
+
+* Both the networks fit the power law and are scale free networks as mentioned in the Yu paper.
+
+* There is a difference in the number of essential genes overlap with the hub genes. In the Yu paper, it is found that there was 20% overlapping of the central genes with that of the essential genes. In our results, we only found a total of 4 genes out of the 466 essential genes in the 108 hub genes in the YIB-Union PPI network (0.8%). We found similar results for the CCSB PPI data. We only found 2 essential genes.
 
 #Question 2:
 
@@ -305,15 +307,15 @@ UnionVSUnionD25<-getMaxOverlapsClusters(outputgraphUnionClust[[2]],outputgraphUn
 CCSBVSCCSBD10<-getMaxOverlapsClusters(outputgraphCCSBClust[[2]],outputgraphCCSBD10Clust[[2]])
 CCSBVSCCSBD25<-getMaxOverlapsClusters(outputgraphCCSBClust[[2]],outputgraphCCSBD25Clust[[2]])
 
-details<-c("Union-M1v/sCCSB-M1","Union-M1v/sUnionD10-M1", "Union-M1v/sUnionD25-M1", "CCSB-M1v/sCCSBD10-M1", "CCSB-M1v/sCCSBD25-M1")
-table<-data.frame(Comparisons=details,"Cluster Numbers"=c(paste0(UnionVSCCSB[1]," and ",UnionVSCCSB[2]), paste0(UnionVSUnionD10[1]," and ",UnionVSUnionD10[2]), paste0(UnionVSUnionD25[1]," and ",UnionVSUnionD25[2]), paste0(CCSBVSCCSBD10[1]," and ",CCSBVSCCSBD10[2]), paste0(CCSBVSCCSBD25[1]," and ",CCSBVSCCSBD25[2])),"#Overlap Genes"= c(UnionVSCCSB[3], UnionVSUnionD10[3], UnionVSUnionD25[3], CCSBVSCCSBD10[3], CCSBVSCCSBD25[3]), "#Gene in Cluster 1"= c(UnionVSCCSB[4], UnionVSUnionD10[4], UnionVSUnionD25[4], CCSBVSCCSBD10[4], CCSBVSCCSBD25[4]), "#Gene in Cluster 2" = c(UnionVSCCSB[5], UnionVSUnionD10[5], UnionVSUnionD25[5], CCSBVSCCSBD10[5], CCSBVSCCSBD25[5]))
+details<-c("Y2H-Unionv/sCCSB-YI1","Y2H-Unionv/sY2H-UnionD10", "Y2H-Unionv/sY2H-UnionD25", "CCSB-YI1v/sCCSB-YI1D10", "CCSB-YI1v/sCCSB-YI1D25")
+table<-data.frame(Comparisons=details,"Module Numbers"=c(paste0(UnionVSCCSB[1]," and ",UnionVSCCSB[2]), paste0(UnionVSUnionD10[1]," and ",UnionVSUnionD10[2]), paste0(UnionVSUnionD25[1]," and ",UnionVSUnionD25[2]), paste0(CCSBVSCCSBD10[1]," and ",CCSBVSCCSBD10[2]), paste0(CCSBVSCCSBD25[1]," and ",CCSBVSCCSBD25[2])),"#Overlap Genes"= c(UnionVSCCSB[3], UnionVSUnionD10[3], UnionVSUnionD25[3], CCSBVSCCSBD10[3], CCSBVSCCSBD25[3]), "#Gene in Module 1"= c(UnionVSCCSB[4], UnionVSUnionD10[4], UnionVSUnionD25[4], CCSBVSCCSBD10[4], CCSBVSCCSBD25[4]), "#Gene in Module 2" = c(UnionVSCCSB[5], UnionVSUnionD10[5], UnionVSUnionD25[5], CCSBVSCCSBD10[5], CCSBVSCCSBD25[5]))
 table %>% knitr::kable(caption = "Overlap Details of the Modules")
 ```
 
 From table 13, it can be seen that the maximum overlap between the Y2H Union and CCSB YI1 PPI network clusters is of 32 genes. It should be noted that this overlap is between the cluster 2 of the Y2H Union and cluster 1 CCSB YI1 PPI network. When we tried to compare the top most cluster of both these networks it gives us an overlap of only 1 gene. As, we know that Y2H Union is a superset of the CCSB YI1 network, we can observe that results from network analysis depend a lot on the initial dataset. If the initial data is changed, our whole results gets changed which we found in our results. The same thing we found when we compared the deleted networks with the original ones.
 
 ##iii).
-For this question, we selected the largest modules of both the PPI networks based on the number of nodes in the network as shown in Figure 1 and 2. After that, we used the [Yeast Genome](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster. [Revigo](http://revigo.irb.hr) is used to group the GO terms.
+For this question, we selected the largest modules of both the PPI networks based on the number of nodes in the network as shown in Figure 1 and 2. After that, we used the [**Yeast Genome**](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster. [**Revigo**](http://revigo.irb.hr)** is used to group the GO terms.
 
 Figure 3 consists of one part of the output that we get after entering the genes from the largest connected cluster of Y1-Union PPI. The genes in the cluster are associated with various biosynthetic and metabolic processes which are essential for the survival of yeast. In Figure 4, it is seen that we have four major groups of GO Biological processes including single organism metabolism, organophosphate biosynthesis, single organism process, and pyrimidine containing compound metabolism. All of these groups are in fact essential for yeast growth and development thus we can say from this observation that this is a very important cluster of genes for yeast development.
 
