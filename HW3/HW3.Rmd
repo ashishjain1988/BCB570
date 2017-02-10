@@ -286,21 +286,59 @@ table %>% knitr::kable(caption = "Details of the Largest Modules in CCSB-YI1 PPI
 
 ##Comparison of Modules
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+#To get the maximum overlap clusters
+getMaxOverlapsClusters<-function(graph1, graph2)
+{
+  dGraph1<-decompose.graph(graph1)
+  dGraph2<-decompose.graph(graph2)
+  largestIntersect<-0
+  cluster1<-0
+  cluster2<-0
+  node1<-0
+  node2<-0
+  for(i in 1:length(dGraph1))
+  {
+    if(vcount(dGraph1[[i]]) >=5)
+    {
+      for(j in 1:length(dGraph2))
+      {
+        if(vcount(dGraph2[[j]]) >=5)
+        {
+          inter<-intersect(names(V(dGraph1[[i]])),names(V(dGraph2[[j]])))
+          if(length(inter) > largestIntersect)
+          {
+            largestIntersect<-length(inter)
+            cluster1<-i
+            cluster2<-j
+            node1<-vcount(dGraph1[[i]])
+            node2<-vcount(dGraph2[[j]])
+          }
+        }
+      }
+    }
+  }
+  return(c(cluster1,cluster2,largestIntersect,node1,node2))
+}
 
-intersect(names(V(lgraphUnionClust)),names(V(lgraphCCSBClust)))
-intersect(names(V(lgraphUnionClust)),names(V(lgraphUnionD10Clust)))
-intersect(names(V(lgraphUnionClust)),names(V(lgraphUnionD25Clust)))
-intersect(names(V(lgraphCCSBClust)),names(V(lgraphCCSBD10Clust)))
-intersect(names(V(lgraphCCSBClust)),names(V(lgraphCCSBD25Clust)))
+UnionVSCCSB<-getMaxOverlapsClusters(outputgraphUnionClust[[2]],outputgraphCCSBClust[[2]])
+UnionVSUnionD10<-getMaxOverlapsClusters(outputgraphUnionClust[[2]],outputgraphUnionD10Clust[[2]])
+UnionVSUnionD25<-getMaxOverlapsClusters(outputgraphUnionClust[[2]],outputgraphUnionD25Clust[[2]])
+CCSBVSCCSBD10<-getMaxOverlapsClusters(outputgraphCCSBClust[[2]],outputgraphCCSBD10Clust[[2]])
+CCSBVSCCSBD25<-getMaxOverlapsClusters(outputgraphCCSBClust[[2]],outputgraphCCSBD25Clust[[2]])
 
 details<-c("Union-M1v/sCCSB-M1","Union-M1v/sUnionD10-M1", "Union-M1v/sUnionD25-M1", "CCSB-M1v/sCCSBD10-M1", "CCSB-M1v/sCCSBD25-M1")
-table<-data.frame(Comparisons=details,"Number of Gene Overlap"= c(length(intersect (names(V(lgraphUnionClust)), names(V(lgraphCCSBClust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD10Clust)))), length(intersect(names(V(lgraphUnionClust)), names(V(lgraphUnionD25Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD10Clust)))), length(intersect(names(V(lgraphCCSBClust)), names(V(lgraphCCSBD25Clust))))), "Number of Gene in Network 1"= c(vcount(lgraphUnionClust), vcount(lgraphUnionClust),vcount(lgraphUnionClust), vcount(lgraphCCSBClust),vcount(lgraphCCSBClust)), "Number of Gene in Network 2" = c(vcount(lgraphCCSBClust), vcount(lgraphUnionD10Clust), vcount(lgraphUnionD25Clust), vcount(lgraphCCSBD10Clust), vcount(lgraphCCSBD25Clust)))
-table %>% knitr::kable(caption = "Details of the Largest Modules")
+table<-data.frame(Comparisons=details,"Cluster Numbers"=c(paste0(UnionVSCCSB[1]," and ",UnionVSCCSB[2]), paste0(UnionVSUnionD10[1]," and ",UnionVSUnionD10[2]), paste0(UnionVSUnionD25[1]," and ",UnionVSUnionD25[2]), paste0(CCSBVSCCSBD10[1]," and ",CCSBVSCCSBD10[2]), paste0(CCSBVSCCSBD25[1]," and ",CCSBVSCCSBD25[2])),"#Overlap Genes"= c(UnionVSCCSB[3], UnionVSUnionD10[3], UnionVSUnionD25[3], CCSBVSCCSBD10[3], CCSBVSCCSBD25[3]), "#Gene in Cluster 1"= c(UnionVSCCSB[4], UnionVSUnionD10[4], UnionVSUnionD25[4], CCSBVSCCSBD10[4], CCSBVSCCSBD25[4]), "#Gene in Cluster 2" = c(UnionVSCCSB[5], UnionVSUnionD10[5], UnionVSUnionD25[5], CCSBVSCCSBD10[5], CCSBVSCCSBD25[5]))
+table %>% knitr::kable(caption = "Overlap Details of the Modules")
 ```
 
+From table 13, it can be seen that the maximum overlap between the Y2H Union and CCSB YI1 PPI network clusters is of 32 genes. It should be noted that this overlap is between the cluster 2 of the Y2H Union and cluster 1 CCSB YI1 PPI network. When we tried to compare the top most cluster of both these networks it gives us an overlap of only 1 gene. As, we know that Y2H Union is a superset of the CCSB YI1 network, we can observe that results from network analysis depend a lot on the initial dataset. If the initial data is changed, our whole results gets changed which we found in our results. The same thing we found when we compared the deleted networks with the original ones.
 
 ##iii).
-For this question we selected the largest modules of both the PPI networks based on the number of nodes in the network. After that, we used the [Yeast Genome](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster.
+For this question, we selected the largest modules of both the PPI networks based on the number of nodes in the network as shown in Figure 1 and 2. After that, we used the [Yeast Genome](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster. [Revigo](http://revigo.irb.hr) is used to group the GO terms.
+
+Figure 3 consists of one part of the output that we get after entering the genes from the largest connected cluster of Y1-Union PPI. The genes in the cluster are associated with various biosynthetic and metabolic processes which are essential for the survival of yeast. In Figure 4, it is seen that we have four major groups of GO Biological processes including single organism metabolism, organophosphate biosynthesis, single organism process, and pyrimidine containing compound metabolism. All of these groups are in fact essential for yeast growth and development thus we can say from this observation that this is a very important cluster of genes for yeast development.
+
+Figure 5 consists of one part of the output that we get after entering the genes from the largest connected cluster of CCSB YI1 PPI. The genes in the cluster are associated with various glycoprotein and lipid metabolism and biosynthetic processes. These processes are essential for the growth and development of yeast. We also used Revigo to group the GO terms. In Figure 6, it is seen that we have two major groups of GO Biological processes including lipid and glycoprotein metabolism. These biological processes are observed to be important for the growth and development of yeast.
 
 YJR010CA YPR159CA YBR126WA not found for CCSB
 
