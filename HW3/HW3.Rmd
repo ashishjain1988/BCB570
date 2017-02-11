@@ -168,10 +168,11 @@ hubNodeslUnion<-names(which(igraph::degree(lgraphUnion) >= 8, arr.ind = T))
 hubNodeslCCSB<-names(which(igraph::degree(lgraphCCSB) >= 8, arr.ind = T))
 length(hubNodeslUnion)
 length(hubNodeslCCSB)
-#rhubNodeslUnion<-rep(intersect(sample(V(lgraphUnion),length(hubNodeslUnion)),as.vector(essentialGenes[,1])),100)
+#rhubNodeslUnion<-rep(intersect(sample(V(lgraphUnion), length(hubNodeslUnion)), as.vector(essentialGenes[,1])),100)
 
 table<-data.frame(Graph=details,Overlap=c(toString(intersect(hubNodeslUnion,as.vector(essentialGenes[,1]))),toString(intersect(hubNodeslCCSB,as.vector(essentialGenes[,1])))))
-table %>% knitr::kable(caption = "Essential genes overlap with hub genes of largest connected sub-network")
+table %>% knitr::kable(caption = "Essential genes overlap with hub genes of 
+                       largest connected sub-network")
 ```
 
 As seen from the above results, only four essential genes overlapped with the hub genes based on the degree distrubution. These genes includes YDR388W (8), YGL115W (8), YLR423C (80), and YPL031C (12). Out of these YLR423C, and YPL031C genes found in both the PPI networks as well as in the essential genes. The biological functions of these genes are as following.
@@ -315,7 +316,7 @@ table %>% knitr::kable(caption = "Overlap Details of the Modules")
 From table 13, it can be seen that the maximum overlap between the Y2H Union and CCSB YI1 PPI network clusters is of 32 genes. It should be noted that this overlap is between the cluster 2 of the Y2H Union and cluster 1 CCSB YI1 PPI network. When we tried to compare the top most cluster of both these networks it gives us an overlap of only 1 gene. As, we know that Y2H Union is a superset of the CCSB YI1 network, we can observe that results from network analysis depend a lot on the initial dataset. If the initial data is changed, our whole results gets changed which we found in our results. The same thing we found when we compared the deleted networks with the original ones.
 
 ##iii).
-For this question, we selected the largest modules of both the PPI networks based on the number of nodes in the network as shown in Figure 1 and 2. After that, we used the [**Yeast Genome**](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster. [**Revigo**](http://revigo.irb.hr)** is used to group the GO terms.
+For this question, we selected the largest modules of both the PPI networks based on the number of nodes in the network as shown in Figure 1 and 2. After that, we used the [**Yeast Genome**](http://yeastmine.yeastgenome.org/) website to carry out the GO terms enrichment analysis to get the common functions associated with the genes in the cluster. [**Revigo**](http://revigo.irb.hr) is used to group the GO terms.
 
 Figure 3 consists of one part of the output that we get after entering the genes from the largest connected cluster of Y1-Union PPI. The genes in the cluster are associated with various biosynthetic and metabolic processes which are essential for the survival of yeast. In Figure 4, it is seen that we have four major groups of GO Biological processes including single organism metabolism, organophosphate biosynthesis, single organism process, and pyrimidine containing compound metabolism. All of these groups are in fact essential for yeast growth and development thus we can say from this observation that this is a very important cluster of genes for yeast development.
 
