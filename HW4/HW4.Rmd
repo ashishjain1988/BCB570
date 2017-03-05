@@ -1,0 +1,53 @@
+---
+title: "BCB570 Assignment 4"
+author: "Ashish Jain"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+library("tidyverse")
+```
+
+#Question 4:
+
+##a) Bagging
+Bootstrap aggregation is called as Bagging. Before explaining bagging first I would like to explain what bootstrap is. Bootstrap is random sampling with replacement which has been used to estimate the sample distribution. Now, bagging is a type of Ensembl method in which bootstrapping is carried out a number of times and the final result is being calculated by taking the average of the all the bootstrap samples. For example, if we have a training set D of size n, we can generate k new training set $D_j$ of size n, by sampling the original training set D uniformly and with replacement. These training sets can have duplicate observations as the sampling is carried out with replacement. From definition, each sampling is called as bootstrapping and the generation of k new training set is called as bagging. Finally, the generated k models generated are combined by taking the average (regression) or through voting (classification).
+
+##b)
+##Network Details
+```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+normalData<-rnorm(100, mean = 2.5, sd = sqrt(10))
+baggedData<-matrix(nrow = 20,ncol = 10)
+for(i in 1:20)
+{
+  baggedData[i,]<-sample(normalData,10,replace = TRUE)
+}
+
+sampleMean<-apply(baggedData,1,mean)
+sampleVariance<-apply(baggedData,1,var)
+hist(sampleMean)
+#lines(density(sampleMean))  
+hist(sampleVariance)
+#lines(density(sampleVariance))  
+```
+
+#Question 5:
+
+##a).
+
+#WGCNA
+
+#GENIE3
+
+#CLR
+
+##b).
+
+##c).
+
+
