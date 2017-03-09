@@ -74,11 +74,12 @@ ARACNE2 tool is based on the mutual information. It calculates and predicts the 
 
 The gold standards given to us are directed but the results that we get from our tools are undirected. So, in order to make the Precision-Recall (PR) curves, we have made the gold standards undirected making both the directions for a particular edge as positive. After that, we have wrote a java code to calculate the PR values, using which a PR curve is made in R.
 ```
-#PR Code
+#PR Java Code
 
 ```
 
 ```{r}
+##Code to plot the PR curve
 
 ```
 
