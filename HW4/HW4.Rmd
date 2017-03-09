@@ -60,63 +60,26 @@ Below is the code and the commands we have used to predict the GRNs using GENIE3
 
 ```
 #Code for GENIE3
-source("/home/jain/Placenta_Geo_Dataset/GRN_Dataset/DREAM-5/GENIE3_R_C_wrapper/GENIE3_R_C_wrapper/GENIE3.R")
-setwd("/home/jain/Placenta_Geo_Dataset/GRN_Dataset/DREAM-5/GENIE3_R_C_wrapper/GENIE3_R_C_wrapper/")
+source("GENIE3.R")
+setwd("./GENIE3_R_C_wrapper/GENIE3_R_C_wrapper/")
 filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
 expr.matrix <- read.expr.matrix(paste0(filePath,"concatenateddata1.tsv"), form="rows.are.samples")
-
 scaleData<-t(apply(expr.matrix,1,function(x){return((x-mean(x))/sd(x))}))
-#TF<-read.table("/home/jain/Placenta_Geo_Dataset/GRN_Dataset/E7.5_Whole-Placenta/Mus_musculus_TF_EnsemblID.txt.geneName1.txt")
-#intersect((row.names(expr.matrix)),as.character(TF[,1]))
-
 weight.matrix1 <- GENIE3(scaleData,ncores = 8, K="all",ntrees = 100)
 link.list <- get.link.list(weight.matrix1)
 write.table(link.list,paste0(filePath,"GENIE3-allLinks.txt"),row.names = F)
-#head(link.list)
-truehist(link.list$weight)
-png(filename=paste0(filePath,"GENIE3-densityPlot.png"), width = 1200, height = 800)
-d <- density(link.list$weight) # returns the density data 
-plot(d)
-abline(v=quantile(link.list$weight,0.75), col = "red")
-dev.off()
-#link.list <- get.link.list(weight.matrix1, threshold=quantile(link.list$weight,0.75))
 write.table(link.list[link.list$weight >= quantile(link.list$weight,0.75),],paste0(filePath,"GENIE3-filterLinks.txt"),row.names = F,col.names = F,sep = "\t")
 ```
 
 WGCNA is weighted gene co-expression network analysis package in R which predicts the GRNs based on the co-expression analysis. In our case, we have used spearson correlation method to calculate the co-expression values. We have tried to make the network scale free but $R^2$ value for very high threshold is coming out to be only 0.4 which is not very good. The corresponding degree is also coming out to be very small. Due to these problems, we have taken power as 1 to calculate the adjacency matrix.
 
-```
+```{r}
 #Code for WGCNA
 library(WGCNA)
 library(igraph)
 options(stringsAsFactors = FALSE);
 filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
 datExpr <- read.table(paste0(filePath,"concatenateddata1.tsv"),header = T);
-#write.table(t(as.matrix(datExpr)),paste0(filePath,"concatenateddata2.tsv"),row.names = T,sep = "\t")
-
-#datExpr = as.data.frame(t(as.matrix(datExpr)))
-powers = c(seq(from = 30, to=50, by=2))
-# Call the network topology analysis function
-sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5)
-# Plot the results:
-sizeGrWindow(9, 5)
-par(mfrow = c(1,2));
-cex1 = 0.9;
-png(filename=paste0(filePath,"WGCNA-densityPlot1.png"), width = 1200, height = 800)
-plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
-     main = paste("Scale independence"));
-text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
-     labels=powers,cex=cex1,col="red");
-abline(h=0.7,col="red")
-dev.off()
-png(filename=paste0(filePath,"WGCNA-densityPlot2.png"), width = 1200, height = 800)
-plot(sft$fitIndices[,1], sft$fitIndices[,5],
-     xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
-     main = paste("Mean connectivity"))
-text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
-dev.off()
-
 #softPower = 30
 datAdj= adjacency(datExpr,
                   type = "unsigned",
@@ -124,11 +87,7 @@ datAdj= adjacency(datExpr,
                   corFnc = "cor", corOptions = "use = 'p', method = 'spearman'")
 
 diag(datAdj) <- 0
-
 threshold<-quantile(datAdj,0.75)
-sig_values <- which(datAdj>threshold, arr.ind=TRUE) ##Find values greater than 0.5
-Cor_Edges <- data.frame(rownames(datAdj)[sig_values[,1]],colnames(datAdj)[sig_values[,2]]) ##Build a table with Correlation values > 0.6.
-#thres<-quantile(edges$weight,0.75)
 ig <- graph.adjacency(datAdj, mode="directed", weighted=TRUE)
 edges<-get.edgelist(ig)
 weights<-edge_attr(ig,"weight")
@@ -140,7 +99,7 @@ ARACNE2 tool is based on the mutual information. It calculates and predicts the 
 
 ```
 #Code for ARACNE2
-java -jar aracne2\ \(1\).jar -i ./HW4_Yeast1-1/HW4_Yeast1-1/concatenateddata2.tsv -o ./HW4_Yeast1-1/HW4_Yeast1-1/ARCANE-adjMat.txt
+java -jar aracne2.jar -i ./HW4_Yeast1-1/concatenateddata2.tsv -o ./HW4_Yeast1-1/ARCANE-adjMat.txt
 
 #Code to convert the Results
 import java.io.BufferedReader;
@@ -153,7 +112,7 @@ public class CreateEdgeListFromARACNE {
 	public static void main(String[] args) throws IOException{
 		for(int f=1;f<=5;f++)
 		{
-			String filePath = "/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_"+f+"/";;
+			String filePath = "Size_10/Size_10/DREAM4_training_data/insilico_size10_"+f+"/";;
 			BufferedReader br = new BufferedReader(new FileReader(filePath+"ARCANE-adjMat.txt"));
 			String line = br.readLine();
 			PrintWriter pw = new PrintWriter(filePath+"ARCANEedge.txt");
@@ -177,7 +136,7 @@ public class CreateEdgeListFromARACNE {
 }
 ```
 
-```
+```{tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 ##R Code to Filter the size
 filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
 edgesWithWT <-read.table(paste0(filePath,"ARCANEedge.txt"),header = F);
@@ -208,8 +167,8 @@ public class PrecisionRecallCurveValues {
 	public static void main(String[] args) throws IOException{
 		for(int f=1;f<=5;f++)
 		{
-			String filePath = "/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_"+f+"/";
-			BufferedReader br = new BufferedReader(new FileReader("/home/jain/BCB570/Size_10/Size_10/DREAM4_gold_standards/insilico_size10_"+f+"_goldstandard.tsv"));
+			String filePath = "./DREAM4_training_data/insilico_size10_"+f+"/";
+			BufferedReader br = new BufferedReader(new FileReader("./DREAM4_gold_standards/insilico_size10_"+f+"_goldstandard.tsv"));
 			String line = br.readLine();
 			Map<String, Integer> goldStandard = new HashMap<>();
 			while(line!=null)
@@ -299,30 +258,35 @@ public class PrecisionRecallCurveValues {
 
 ```{r}
 ##Code to plot the PR curve
-
-install.packages("Bolstad2")
+#install.packages("Bolstad2")
+githubPage<-"https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/data/"
+trainingData<-"training_data/insilico_size10_"
 library(Bolstad2)
+AUCWGCNA<-c()
+AUCGEN<-c()
+AUCARCNE<-c()
 for(i in 1:5)
 {
-  filePath<-paste0("/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_",i,"/")
+  filePath<-paste0(githubPage,trainingData,i,"/")
   WGCNA<-read.table(paste0(filePath,"WGCNA-PrecisionRecallValues.txt"),header = F)
   GEN<-read.table(paste0(filePath,"GENIE3-PrecisionRecallValues.txt"),header = F)
   ARCNE<-read.table(paste0(filePath,"ARCANE-PrecisionRecallValues.txt"),header = F)
-  AUCWGCNA<-sintegral(WGCNA$V2,WGCNA$V1)$int
-  AUCGEN<-sintegral(GEN$V2,GEN$V1)$int
-  AUCARCNE<-sintegral(ARCNE$V2,ARCNE$V1)$int
-  print(AUCARCNE)
-  print(AUCGEN)
-  print(AUCWGCNA)
-  png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
+  AUCWGCNA<-c(AUCWGCNA,sintegral(WGCNA$V2,WGCNA$V1)$int)
+  AUCGEN<-c(AUCGEN,sintegral(GEN$V2,GEN$V1)$int)
+  AUCARCNE<-c(AUCARCNE,sintegral(ARCNE$V2,ARCNE$V1)$int)
+  #png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
   ggplot(data.frame(WGCNA,ARCNE,GEN),aes(x=WGCNA$V2,y=WGCNA$V1,color="WGCNA")) + ggtitle("PR Curve Network 5") + xlab("Recall") + ylab("Precision") + geom_line() + geom_line(aes(x=GEN$V2,y=GEN$V1,color="GENIE3")) + geom_line(aes(x=ARCNE$V2,y=ARCNE$V1,color="ARCNE"))
-  dev.off()
+  #dev.off()
 }
+details<-c("Network 1","Network 2","Network 3","Network 4","Network 5")
+table<-data.frame(Network=details,"AUC-ARCNE2" =AUCARCNE,"AUC-GENIE3"=AUCGEN,"AUC-WGCNA"=AUCWGCNA)
+table %>% knitr::kable(caption = "Area Under Precision-Recall Curve")
 ```
 
-The PR curves shows that in ARACNE2's performance is the best based on the insilico network results. GENIE3 is the second best and the results are pretty much close to that of the ARACNE2.
+In the table1, the Area under the PR curve is shown. It is seen from the results that ARACNE2 and GENIE3 performs similarly in all the networks.For part c we are going to ARCNE2 as it have more AUC for three networks than GENIE3.
 
 
 ##c).
 
 Based on the results from part b we used ARACNE2 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached.
+
