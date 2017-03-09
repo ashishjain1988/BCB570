@@ -141,7 +141,8 @@ ARACNE2 tool is based on the mutual information. It calculates and predicts the 
 ```
 #Code for ARACNE2
 java -jar aracne2\ \(1\).jar -i ./HW4_Yeast1-1/HW4_Yeast1-1/concatenateddata2.tsv -o ./HW4_Yeast1-1/HW4_Yeast1-1/ARCANE-adjMat.txt
-##Code to convert the Results
+
+#Code to convert the Results
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -174,7 +175,9 @@ public class CreateEdgeListFromARACNE {
 		}
 	}
 }
+```
 
+```
 ##R Code to Filter the size
 filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
 edgesWithWT <-read.table(paste0(filePath,"ARCANEedge.txt"),header = F);
@@ -182,13 +185,9 @@ write.table(edgesWithWT[edgesWithWT$V3 >= quantile(edgesWithWT$V3,0.75),],paste0
 ```
 
 The gold standards given to us are directed but the results that we get from our tools are undirected. So, in order to make the Precision-Recall (PR) curves, we have made the gold standards undirected making both the directions for a particular edge as positive. After that, we have wrote a java code to calculate the PR values, using which a PR curve is made in R.
+
 ```
 #PR Java Code
-
-```
-
-```{r}
-##Code to plot the PR curve
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -298,15 +297,17 @@ public class PrecisionRecallCurveValues {
 ```
 
 
-```
+```{r}
+##Code to plot the PR curve
+
 filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
 WGCNA<-read.table(paste0(filePath,"WGCNA-PrecisionRecallValues.txt"),header = F)
 GEN<-read.table(paste0(filePath,"GENIE3-PrecisionRecallValues.txt"),header = F)
 ARCNE<-read.table(paste0(filePath,"ARCANE-PrecisionRecallValues.txt"),header = F)
 
-png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
+#png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
 ggplot(data.frame(WGCNA,ARCNE,GEN),aes(x=WGCNA$V2,y=WGCNA$V1,color="WGCNA")) + ggtitle("PR Curve Network 5") + xlab("Recall") + ylab("Precision") + geom_line() + geom_line(aes(x=GEN$V2,y=GEN$V1,color="GENIE3")) + geom_line(aes(x=ARCNE$V2,y=ARCNE$V1,color="ARCNE"))
-dev.off()
+#dev.off()
 ```
 
 The PR curves shows that in ARACNE2's performance is the best based on the insilico network results. GENIE3 is the second best and the results are pretty much close to that of the ARACNE2.
