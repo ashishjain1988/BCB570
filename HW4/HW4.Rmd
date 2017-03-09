@@ -19,7 +19,7 @@ library("tidyverse")
 Bootstrap aggregation is called as Bagging. Before explaining bagging first I would like to explain what bootstrap is. Bootstrap is random sampling with replacement which has been used to estimate the sample distribution. Now, bagging is a type of Ensembl method in which bootstrapping is carried out a number of times and the final result is being calculated by taking the average of the all the bootstrap samples. For example, if we have a training set D of size n, we can generate k new training set $D_j$ of size n, by sampling the original training set D uniformly and with replacement. These training sets can have duplicate observations as the sampling is carried out with replacement. From definition, each sampling is called as bootstrapping and the generation of k new training set is called as bagging. Finally, the generated k models generated are combined by taking the average (regression) or through voting (classification).
 
 ##b)
-##Network Details
+
 ```{r, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 normalData<-rnorm(100, mean = 2.5, sd = sqrt(10))
 baggedData<-matrix(nrow = 20,ncol = 10)
@@ -29,25 +29,62 @@ for(i in 1:20)
 }
 
 sampleMean<-apply(baggedData,1,mean)
-sampleVariance<-apply(baggedData,1,var)
+sampleVariance<-(apply(baggedData,1,var))
 hist(sampleMean)
-#lines(density(sampleMean))  
 hist(sampleVariance)
-#lines(density(sampleVariance))  
+samMean<-mean(sampleMean)
+samVariance<-mean(sampleVariance)
 ```
+
+The estimated value of the mean after bagging is `r samMean` and the variance is `r samVariance`.
 
 #Question 5:
 
 ##a).
 
 #WGCNA
+In WGCNA, we first calculated the soft threshold for calculating the the power of the adjacency matrix. In this, I took the threshold at $R^2$ value. After that, we took the top quartile edge weight value as the threshold to filter the edges.
 
 #GENIE3
+In GENIE3, we first normalized the expression values as suggested in the GENIE3 paper. After that, we used 100 decision tress to predict the edges between the genes. After that, we took the top quartile value as the threshold to filter the edges. 
 
-#CLR
+#ARACNE
+In ARACNE, we took the we took the top quartile mutual information value as the threshold to filter the edges.
 
 ##b).
 
+Below is the R code which has been used to run the different tools on the dataset and then filter the edges based on their respective scores. As, we mentioned we filtered edges based on top quartile value. 
+Below is the code and the commands we have used to predict the GRNs using GENIE3 which is based on the random forest algorithm. In our case, we have used a total of 100 decision trees to predict the GRN.
+```
+#Code for GENIE3
+```
+
+WGCNA is weighted gene co-expression network analysis package in R which predicts the GRNs based on the co-expression analysis. In our case, we have used spearson correlation method to calculate the co-expression values. We have tried to make the network scale free but $R^2$ value for very high threshold is coming out to be only 0.4 which is not very good. The corresponding degree is also coming out to be very small. Due to these problems, we have taken power as 1 to calculate the adjacency matrix.
+
+```
+#Code for WGCNA
+```
+
+ARACNE2 tool is based on the mutual information. It calculates and predicts the weights of the edges based on mutual information. In our study, we have used a java executable which takes gene expression files as an input. In this case, the gene expression file should contain gene as rows and samples as column. The results from this tool is not in a very good format, so we wrote a java code which give us the output as a list of edges with their weight. 
+
+```
+#Code for ARACNE2
+
+```
+
+The gold standards given to us are directed but the results that we get from our tools are undirected. So, in order to make the Precision-Recall (PR) curves, we have made the gold standards undirected making both the directions for a particular edge as positive. After that, we have wrote a java code to calculate the PR values, using which a PR curve is made in R.
+```
+#PR Code
+
+```
+
+```{r}
+
+```
+
+The PR curves shows that in ARACNE2's performance is the best based on the insilico network results. GENIE3 is the second best and the results are pretty much close to that of the ARACNE2.
+
+
 ##c).
 
-
+Based on the results from part b we used ARACNE2 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached.
