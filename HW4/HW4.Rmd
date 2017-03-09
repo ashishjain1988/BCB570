@@ -300,14 +300,24 @@ public class PrecisionRecallCurveValues {
 ```{r}
 ##Code to plot the PR curve
 
-filePath<-"/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_5/"
-WGCNA<-read.table(paste0(filePath,"WGCNA-PrecisionRecallValues.txt"),header = F)
-GEN<-read.table(paste0(filePath,"GENIE3-PrecisionRecallValues.txt"),header = F)
-ARCNE<-read.table(paste0(filePath,"ARCANE-PrecisionRecallValues.txt"),header = F)
-
-#png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
-ggplot(data.frame(WGCNA,ARCNE,GEN),aes(x=WGCNA$V2,y=WGCNA$V1,color="WGCNA")) + ggtitle("PR Curve Network 5") + xlab("Recall") + ylab("Precision") + geom_line() + geom_line(aes(x=GEN$V2,y=GEN$V1,color="GENIE3")) + geom_line(aes(x=ARCNE$V2,y=ARCNE$V1,color="ARCNE"))
-#dev.off()
+install.packages("Bolstad2")
+library(Bolstad2)
+for(i in 1:5)
+{
+  filePath<-paste0("/home/jain/BCB570/Size_10/Size_10/DREAM4_training_data/insilico_size10_",i,"/")
+  WGCNA<-read.table(paste0(filePath,"WGCNA-PrecisionRecallValues.txt"),header = F)
+  GEN<-read.table(paste0(filePath,"GENIE3-PrecisionRecallValues.txt"),header = F)
+  ARCNE<-read.table(paste0(filePath,"ARCANE-PrecisionRecallValues.txt"),header = F)
+  AUCWGCNA<-sintegral(WGCNA$V2,WGCNA$V1)$int
+  AUCGEN<-sintegral(GEN$V2,GEN$V1)$int
+  AUCARCNE<-sintegral(ARCNE$V2,ARCNE$V1)$int
+  print(AUCARCNE)
+  print(AUCGEN)
+  print(AUCWGCNA)
+  png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
+  ggplot(data.frame(WGCNA,ARCNE,GEN),aes(x=WGCNA$V2,y=WGCNA$V1,color="WGCNA")) + ggtitle("PR Curve Network 5") + xlab("Recall") + ylab("Precision") + geom_line() + geom_line(aes(x=GEN$V2,y=GEN$V1,color="GENIE3")) + geom_line(aes(x=ARCNE$V2,y=ARCNE$V1,color="ARCNE"))
+  dev.off()
+}
 ```
 
 The PR curves shows that in ARACNE2's performance is the best based on the insilico network results. GENIE3 is the second best and the results are pretty much close to that of the ARACNE2.
