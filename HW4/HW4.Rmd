@@ -265,10 +265,14 @@ public class PrecisionRecallCurveValues {
 #install.packages("Bolstad2")
 githubPage<-"https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/data/"
 trainingData<-"training_data/insilico_size10_"
+goldstandard<-"training_data/gold_standard/insilico_size10_"
 library(Bolstad2)
 AUCWGCNA<-c()
 AUCGEN<-c()
 AUCARCNE<-c()
+AccWGCNA<-c()
+AccGEN<-c()
+AccARCNE<-c()
 for(i in 1:5)
 {
   filePath<-paste0(githubPage,trainingData,i,"/")
@@ -281,13 +285,25 @@ for(i in 1:5)
   #png(filename=paste0(filePath,"PR-Curve.png"), width = 1200, height = 800)
   ggplot(data.frame(WGCNA,ARACNE,GEN),aes(x=WGCNA$V2,y=WGCNA$V1,color="WGCNA")) + ggtitle("PR Curve Network 5") + xlab("Recall") + ylab("Precision") + geom_line() + geom_line(aes(x=GEN$V2,y=GEN$V1,color="GENIE3")) + geom_line(aes(x=ARACNE$V2,y=ARACNE$V1,color="ARCNE"))
   #dev.off()
+  ##Accuracy
+  goldStd<-read.table(paste0(githubPage,goldstandard,i,"_goldstandard.tsv")) %>% mutate(edge=paste0(V1,"-",V2))
+  aracaneEdges<-read.table(paste0(filePath,"ARCANE-filterLinks.txt"),header = F) %>% mutate(edge=paste0(V1,"-",V2))
+  WGCNAEdges<-read.table(paste0(filePath,"WGCNA-filterLinks.txt"),header = F) %>% mutate(edge=paste0(V1,"-",V2))
+  GENEdges<-read.table(paste0(filePath,"GENIE3-filterLinks.txt"),header = F) %>% mutate(edge=paste0(V1,"-",V2))
+  
+  AccARCNE<-c(AccARCNE,length(intersect(goldStd$edge,aracaneEdges$edge))/length(goldStd$edge)*100)
+  AccGEN<-c(AccGEN,length(intersect(goldStd$edge,GENEdges$edge))/length(goldStd$edge)*100)
+  AccWGCNA<-c(AccWGCNA,length(intersect(goldStd$edge,WGCNAEdges$edge))/length(goldStd$edge)*100)
 }
 details<-c("Network 1","Network 2","Network 3","Network 4","Network 5")
-table<-data.frame(Network=details,"AUC-ARACNE2" =AUCARCNE,"AUC-GENIE3"=AUCGEN,"AUC-WGCNA"=AUCWGCNA)
+table<-data.frame(Network=details,"ARACNE2" =AUCARCNE,"GENIE3"=AUCGEN,"WGCNA"=AUCWGCNA)
 table %>% knitr::kable(caption = "Area Under Precision-Recall Curve")
+
+table1<-data.frame(Network=details,"ARACNE2" =AccARCNE,"GENIE3"=AccGEN,"WGCNA"=AccWGCNA)
+table1 %>% knitr::kable(caption = "Accuracy in Percentage")
 ```
 
-In the table1, the Area under the PR curve is shown. It is seen from the results that ARACNE2 and GENIE3 performs similarly in all the networks.For part c we are going to ARCNE2 as it have more AUC for three networks than GENIE3.
+In the table1, the area under the PR curve and accuarcy is shown in table 1 and 2. It is seen from the results that ARACNE2 and GENIE3 performs similarly in all the networks.For part c we used both ARACNE2 and GENIE3 for creating the GRN.
 
 ![PR Curve for Network 1](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/results/PR-Curves/insilico_size10_1/PR-Curve.png)
 
@@ -301,4 +317,12 @@ In the table1, the Area under the PR curve is shown. It is seen from the results
 
 ##c).
 
-Based on the results from part b we used ARACNE2 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached.
+Based on the results from part b we used both ARACNE2 and GENIE3 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached.
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/Question1.jpg)
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/Question2.jpg)
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/Question3b.jpg)
+
+![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/Question3c.jpg)
