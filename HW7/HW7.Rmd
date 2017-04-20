@@ -12,14 +12,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-#5-fold cross-validation to design a classifier to separte B and T cells from ALL dataset
-In this problem, first we downloaded the ALL data from bioconductor package. After that, we process the data and created labels for B and T cells. Then, we used the `cvpred.ksvm` function from the `kernlab` for 5-fold cross-validation. First we used the linear classifer for the classification.
+#5-fold cross-validation to design a classifier to separate B and T cells in ALL dataset
+In this problem, first, we downloaded the ALL data from Bioconductor package. After that, we process the data and created labels for B and T cells. Then, we used the `cvpred.ksvm` function from the `kernlab` package for 5-fold cross-validation. First, we used the linear classifier for the classification.
 
 ```{r , tidy=TRUE, tidy.opts=list(width.cutoff=60)}
 #source("https://bioconductor.org/biocLite.R")
 #biocLite("ALL")
 library(kernlab)
 library(ALL)
+library(ROCR)
+source('general.R')
 data(ALL)
 # Predict type of disease from expression data
 y <- substr(ALL$BT,1,1)
@@ -36,7 +38,7 @@ plot(perf,main = "5-fold cross-validation for Linear classifier")
 #plot(unlist(perf@x.values), unlist(perf@y.values))
 ```
 
-The results shows that the linear SVM classifier is able to classify both the B and T cells perfectly (with accuracy equals to 1). The AUROC is also equal to 1. Next, we also tried non-linear classifier using the `Radial Basis kernel` function. 
+The results show that the linear SVM classifier is able to classify both the B and T cells perfectly (with accuracy equals to 1). The AUROC is also equal to 1. Next, we also tried non-linear classifier using the `Radial Basis kernel` function. 
 
 
 ```{r , tidy=TRUE, tidy.opts=list(width.cutoff=60)}
@@ -50,5 +52,5 @@ perf <- performance(pred, measure = "tpr", x.measure = "fpr")
 plot(perf, main = "5-fold cross-validation for Non-linear classifier")
 ```
 
-The results shows that the non-linear SVM classifier also detects both the B and T cells perfectly (with accuracy equals to 1). The AUROC is also equal to 1.
+The results show that the non-linear SVM classifier also detects both the B and T cells perfectly (with accuracy equals to 1). The AUROC is also equal to 1.
 
