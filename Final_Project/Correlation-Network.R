@@ -1,7 +1,7 @@
 library("tidyverse")
 library("igraph")
 setwd("")
-Exp_table = read.table("Breast_cancer.txt", header=T, sep="\t" , row.names=1) ##Input expression matrix
+Exp_table = read.table("allsamplesFPKM-BreastCancer-genes-filtgt1.txt", header=F, sep="," , row.names=1) ##Input expression matrix
 Cor_table_spearman = cor(t(Exp_table), method = "spearman") #Generate Correlation matrix
 Cor_table_pearson = cor(t(Exp_table), method = "pearson") #Generate Correlation matrix
 #write.table(Cor_table, file ="Cor_table.csv", sep =',', dec=".") ##Save correlation matrix
