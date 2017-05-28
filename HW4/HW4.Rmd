@@ -317,7 +317,7 @@ In the table1, the area under the PR curve and accuarcy is shown in table 1 and 
 
 ##c).
 
-Based on the results from part b we used both ARACNE2 and GENIE3 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached.
+Based on the results from part b we used both ARACNE2 and GENIE3 for predicting the GRNs. As mentioned earlier, we have used top quartile value as the threshold for filtreing the edges. The results for both of the yeast networks are attached in the zip file under **"./results/Yeast-GRNs/"** folder.
 
 ![](https://raw.githubusercontent.com/ashishjain1988/BCB570/master/HW4/Question1.jpg)
 
